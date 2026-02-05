@@ -14,7 +14,8 @@ import Recruiters from "./screens/Recruiters";
 import StudentDocuments from "./screens/StudentDocuments";
 import RecruiterDocuments from "./screens/RecruiterDocuments";
 
-import AdminPageLayout from "./ui/layouts/AdminPageLayout";
+import AdminPageLayout from "./ui/layouts/AdminPageLayout"; // ✅ NOW USED
+import EmailVerification from "screens/EmailVerification";
 
 export default function App() {
   return (
@@ -33,12 +34,32 @@ export default function App() {
         <Route path="/success-password" element={<AdminForgotPassword4 />} />
 
         {/* 🔥 ADMIN AREA WITH SIDEBAR */}
-        <Route path="/admin" element={<AdminPageLayout />}>
+        {/* <Route path="/admin" element={<AdminPageLayout />}> */}
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="users" element={<Users />} />
           <Route path="recruiters" element={<Recruiters />} />
           <Route path="documents/students" element={<StudentDocuments />} />
           <Route path="documents/recruiters" element={<RecruiterDocuments />} />
+        <Route path="admin/signup" element={<AdminSignup />} />
+        <Route path="/email-verification" element={<EmailVerification />} />
+
+
+        {/* Admin */}
+        <Route path="/admin/dashboard" element={<Dashboard />} />
+
+        {/* Fallback */} 
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
+        {/* Public */}
+        <Route path="/login" element={<AdminLogin />} />
+
+        {/* 🔥 ADMIN AREA WITH SIDEBAR */}
+        <Route element={<AdminPageLayout />}>
+          <Route path="/admin/dashboard" element={<Dashboard />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/recruiters" element={<Recruiters />} />
+          <Route path="/documents/students" element={<StudentDocuments />} />
+          <Route path="/documents/recruiters" element={<RecruiterDocuments />} />
         </Route>
 
         {/* Catch all */}

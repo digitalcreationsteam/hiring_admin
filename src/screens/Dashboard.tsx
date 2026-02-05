@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import API from "../common/API";
 import { URL_PATH } from "../common/URL_PATH";
+import AdminSidebar from "ui/components/AdminSidebar";
 
 export default function DashboardRight() {
   const [stats, setStats] = useState({

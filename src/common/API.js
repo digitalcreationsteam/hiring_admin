@@ -7,8 +7,8 @@ import axios from "axios";
    🌐 BASE URL
 ========================================= */
 // export const BASE_URL = "http://localhost:5000/api";
-export const BASE_URL = "http://localhost:5001/api";
-// export const BASE_URL = "https://unitalent.cloud/api";
+// export const BASE_URL = "http://localhost:5001/api";
+export const BASE_URL = "https://unitalent.cloud/api";
 
 
 const isDev = process.env.NODE_ENV === "development";
@@ -30,7 +30,7 @@ const apiClient = axios.create({
 export const URL_PATH = {
   /* ---------- AUTH ---------- */
   adminSignup: "/admin/signup",
-  // checkEmailVerification: "/auth/verification-status",
+  checkEmailVerification: "/auth/verification-status",
  
   login: "/auth/login",
 
@@ -43,13 +43,13 @@ export const URL_PATH = {
   // verifyRoute: "/auth/verify-route",
 
   /* ---------- EMAIL VERIFICATION ---------- */
-  // verifyEmail: "/auth/verify",
-  // resendVerification: "/auth/resend-verification",
+  verifyEmail: "/auth/verify",
+  resendVerification: "/auth/resend-verification",
 
   /* ---------- PASSWORD RESET ---------- */
-  // forgotPassword: "/auth/forgot-password",
-  // verifyResetCode: "/auth/verify-reset-code",
-  // resetPassword: "/auth/reset-password",
+  adminForgotPassword: "/auth/forgot-password",
+  adminVerifyResetCode: "/auth/verify-reset-code",
+  adminResetPassword: "/auth/reset-password",
 
 
 };

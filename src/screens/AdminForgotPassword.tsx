@@ -1,110 +1,79 @@
-// components/admin/AdminForgotPassword.tsx
-// ✅ UI + VALIDATION + UX (NO API YET)
-
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import API, { URL_PATH } from "../common/API";
 
-function AdminForgotPassword() {
-  const navigate = useNavigate();
-
+export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  // ------------------
-  // Validation
-  // ------------------
-  const validate = () => {
-    setError("");
-
-    if (!email.trim()) {
-      setError("Email is required.");
-      return false;
-    }
-
-    if (!EMAIL_REGEX.test(email)) {
-      setError("Please enter a valid email address.");
-      return false;
-    }
-
-    return true;
-  };
-
-  // ------------------
-  // Submit handler (API-ready)
-  // ------------------
-  const handleSubmit = () => {
+  // RESET PASSWORD API=========
+  const handleSubmit = async () => {
     if (loading) return;
-    if (!validate()) return;
+    if (!email) {
+      toast.error("Email is required");
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      toast.error("Please enter a valid email");
+      return;
+    }
 
-    setLoading(true);
+    try {
+      setLoading(true);
+      await API("POST", URL_PATH.adminForgotPassword, { email });
+      toast.success("Verification code sent to your email");
 
-    // ⛔ TEMP: simulate success
-    setTimeout(() => {
+      setTimeout(() => {
+        navigate("/verify-code", { state: { email } });
+      }, 3000); // 3 sec is perfect for UX
+    } catch (err: any) {
+      toast.error(err?.message || "Unable to send reset code");
+    } finally {
       setLoading(false);
-      navigate("/verify-code", {
-        state: { email },
-      });
-    }, 1500);
-
-    /*
-      🔌 FUTURE
-      await API("POST", "/admin/forgot-password", { email });
-      navigate("/admin/verify-code", { state: { email } });
-    */
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#EEF4FF] flex items-center justify-center px-4">
-      <div className="bg-white w-full max-w-md rounded-3xl border border-neutral-300 p-6">
-        {/* Back */}
-        <button
-          onClick={() => navigate(-1)}
-          className="mb-6 text-sm text-gray-600 hover:underline"
-        >
-          ← Back
-        </button>
+    <>
+      <ToastContainer position="top-center" autoClose={3000} />
 
-        <h2 className="text-[24px] mb-2">Forgot password</h2>
-        <p className="text-gray-400 mb-6">
-          Enter your admin email to reset your password
-        </p>
+      <div className="min-h-screen bg-[#EEF4FF] flex items-center justify-center px-4">
+        <div className="bg-white w-full border border-neutral-300  max-w-md rounded-3xl p-6">
+          <button onClick={() => navigate(-1)} className="mb-6">
+            ←
+          </button>
 
-        {/* Email */}
-        <label className="block mb-2 text-sm">Email address</label>
-        <input
-          type="email"
-          placeholder="admin@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full h-10 rounded-3xl border border-gray-300 px-4 outline-none focus:border-black"
-        />
+          <h2 className="text-[24px] mb-2">Forgot password</h2>
+          <p className="text-gray-400 mb-6">
+            Please enter your email to reset the password
+          </p>
 
-        {/* Error */}
-        <div
-          aria-live="polite"
-          className="min-h-[1.25rem] mt-2 text-xs text-red-600"
-        >
-          {error}
+          <label className="block  mb-2">Your Email</label>
+          <input
+            type="email"
+            placeholder="Enter your email"
+            className="w-full h-10 border rounded-3xl border border-gray-300 px-4 py-3 mb-10 border-focus-black"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+            className={`w-full h-10 rounded-3xl ${
+              loading
+                ? "bg-violet-300 cursor-not-allowed"
+                : "bg-violet-600 text-white"
+            }`}
+          >
+            {loading ? "Sending..." : "Reset Password"}
+          </button>
         </div>
-
-        {/* Submit */}
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className={`w-full h-10 rounded-3xl font-semibold transition ${
-            loading
-              ? "bg-violet-300 cursor-not-allowed"
-              : "bg-violet-600 text-white hover:bg-violet-700"
-          }`}
-        >
-          {loading ? "Sending..." : "Reset Password"}
-        </button>
       </div>
-    </div>
+    </>
   );
 }
-
-export default AdminForgotPassword;
