@@ -12,6 +12,10 @@ import {
   FeatherLogOut,
 } from "@subframe/core";
 import { colors } from "../../common/colors";
+import logo from "../../assets/logo.png";
+
+
+
 
 const base =
   "flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition select-none";
@@ -22,25 +26,34 @@ function Item({
   to,
   icon,
   label,
+  collapsed,
 }: {
   to: string;
   icon: React.ReactNode;
   label: string;
+  collapsed: boolean;
 }) {
   return (
     <NavLink
       to={to}
-      className={({ isActive }) => `${base} ${isActive ? active : inactive}`}
+      title={collapsed ? label : undefined}
+      className={({ isActive }) =>
+        `${base} ${isActive ? active : inactive} ${collapsed ? "justify-center px-0" : ""}`
+      }
     >
       <span className="w-5 h-5 flex items-center justify-center">{icon}</span>
-      <span className="truncate">{label}</span>
+      {!collapsed && <span className="truncate">{label}</span>}
     </NavLink>
   );
 }
 
+
 export default function AdminPageLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [collapsed, setCollapsed] = useState(false);
+
 
   const isJobsRoute = useMemo(
     () => location.pathname.startsWith("/jobs"),
@@ -48,6 +61,7 @@ export default function AdminPageLayout() {
   );
 
   const [jobsOpen, setJobsOpen] = useState(isJobsRoute);
+  
 
   const logout = () => {
     localStorage.removeItem("adminToken");
@@ -58,62 +72,82 @@ export default function AdminPageLayout() {
     <div className="flex h-screen w-full overflow-hidden">
       {/* LEFT SIDEBAR */}
       <aside
-        className="flex flex-col w-[280px] shrink-0 h-full px-4 py-5 border-r border-white/10"
+className={`flex flex-col shrink-0 h-full py-5 border-r border-white/10 transition-all duration-300 ${
+  collapsed ? "w-[88px] px-3" : "w-[280px] px-4"
+}`}
         style={{
           background:
             "linear-gradient(180deg, #15172B 0%, #14162A 40%, #121328 100%)",
         }}
       >
-        {/* Brand */}
-        <div className="flex items-center gap-3 px-2 pb-6">
-          <div
-            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold"
-            style={{ backgroundColor: colors.primary }}
-          >
-            H
-          </div>
-          <div className="leading-tight">
-            <div className="text-white font-semibold text-lg">EmployX</div>
-            <div className="text-xs text-white/50">Admin</div>
-          </div>
-        </div>
+       {/* Brand */}
+<div className="flex items-center gap-3 px-4 pb-6">
+  <img
+    src="/hiringLogo.png"
+    alt="UniTalent Logo"
+    className="w-42 h-12 object-contain rounded-xl bg-white p-1"
+  />
+
+  {!collapsed && (
+    <div className="leading-tight">
+      <div className="text-white font-semibold text-lg">UniTalent</div>
+      {/* <div className="text-xs text-white/50">Admin</div> */}
+    </div>
+  )}
+</div>
+
+
 
         {/* MENU */}
         <div className="flex flex-col gap-1">
           <Item
-            to="/admin/dashboard"
-            icon={<FeatherHome className="w-5 h-5" />}
-            label="Dashboard"
-          />
+  to="/admin/dashboard"
+  icon={<FeatherHome className="w-5 h-5" />}
+  label="Dashboard"
+  collapsed={collapsed}
+/>
 
-          <Item
-            to="/admin/users"
-            icon={<FeatherUsers className="w-5 h-5" />}
-            label="Users"
-          />
-          <Item
-            to="/admin/Recruiters"
-            icon={<FeatherHeadphones className="w-5 h-5" />}
-            label="Recruiters"
-          />
+<Item
+  to="/admin/users"
+  icon={<FeatherUsers className="w-5 h-5" />}
+  label="Users"
+  collapsed={collapsed}
+/>
+
+<Item
+  to="/admin/recruiters"
+  icon={<FeatherHeadphones className="w-5 h-5" />}
+  label="Recruiters"
+  collapsed={collapsed}
+/>
+
 
           {/* Jobs dropdown like screenshot */}
           <button
-            type="button"
-            onClick={() => setJobsOpen((v) => !v)}
-            className={`${base} ${isJobsRoute ? active : inactive}`}
-          >
-            <span className="w-5 h-5 flex items-center justify-center">
-              <FeatherBriefcase className="w-5 h-5" />
-            </span>
-            <span className="flex-1 text-left">Documents</span>
-            {jobsOpen ? (
-              <FeatherChevronDown className="w-4 h-4" />
-            ) : (
-              <FeatherChevronRight className="w-4 h-4" />
-            )}
-          </button>
+  type="button"
+  onClick={() => setJobsOpen((v) => !v)}
+  title={collapsed ? "Documents" : undefined}
+  className={`${base} ${isJobsRoute ? active : inactive} ${
+    collapsed ? "justify-center px-0" : ""
+  }`}
+>
+  <span className="w-5 h-5 flex items-center justify-center">
+    <FeatherBriefcase className="w-5 h-5" />
+  </span>
 
+  {!collapsed && (
+    <>
+      <span className="flex-1 text-left">Documents</span>
+      {jobsOpen ? (
+        <FeatherChevronDown className="w-4 h-4" />
+      ) : (
+        <FeatherChevronRight className="w-4 h-4" />
+      )}
+    </>
+  )}
+</button>
+
+{!collapsed && (
           <div
             className={`ml-4 pl-3 border-l border-white/10 overflow-hidden transition-all ${
               jobsOpen ? "max-h-40" : "max-h-0"
@@ -136,6 +170,7 @@ export default function AdminPageLayout() {
               User Documents
             </NavLink>
           </div>
+          )}
 
           
         </div>
@@ -144,6 +179,7 @@ export default function AdminPageLayout() {
 <div className="mt-auto pt-6">
   <button
     onClick={logout}
+    title={collapsed ? "Log out" : undefined}
     className={`
       ${base}
       w-full
@@ -152,21 +188,71 @@ export default function AdminPageLayout() {
       hover:bg-red-100
       hover:text-red-700
       border border-red-100
+      ${collapsed ? "justify-center px-0" : ""}
     `}
   >
     <span className="w-5 h-5 flex items-center justify-center">
       <FeatherLogOut className="w-5 h-5" />
     </span>
-    Log out
+    {!collapsed && "Log out"}
   </button>
 </div>
 
+
       </aside>
 
-      {/* RIGHT CONTENT (Dashboard / Users / etc) */}
-      <main className="flex-1 min-w-0 overflow-y-auto">
-        <Outlet />
-      </main>
+     {/* RIGHT CONTENT (Header + Pages) */}
+<main className="flex-1 min-w-0 overflow-y-auto bg-slate-100">
+  {/* TOP HEADER */}
+  <div className="sticky top-0 z-40 bg-white border-b border-slate-200">
+    <div className="h-16 px-6 flex items-center justify-between gap-4">
+      {/* Left: menu button + search */}
+      <div className="flex items-center gap-3 flex-1">
+        <button
+          type="button"
+          className="h-10 w-10 rounded-xl bg-blue-600 text-white flex items-center justify-center"
+onClick={() => setCollapsed((v) => !v)}
+        >
+          ☰
+        </button>
+
+        <div className="flex items-center gap-2 flex-1 max-w-xl bg-slate-100 rounded-2xl px-4 h-10">
+          <span className="text-slate-500">🔍</span>
+          <input
+            placeholder="Search"
+            className="bg-transparent outline-none w-full text-sm text-slate-700 placeholder:text-slate-500"
+          />
+        </div>
+      </div>
+
+      {/* Right: admin name + initials */}
+      <div className="flex items-center gap-3">
+        <div className="text-right leading-tight hidden sm:block">
+          <div className="text-sm font-semibold text-slate-900">
+            {localStorage.getItem("adminName") || "Admin"}
+          </div>
+          <div className="text-xs text-slate-500">Admin</div>
+        </div>
+
+        <div className="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center font-semibold text-slate-700">
+          {(localStorage.getItem("adminName") || "Admin")
+            .split(" ")
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((x) => x[0])
+            .join("")
+            .toUpperCase()}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* PAGE CONTENT */}
+  <div className="p-6">
+    <Outlet />
+  </div>
+</main>
+
     </div>
   );
 }
