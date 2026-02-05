@@ -27,6 +27,7 @@ export default function App() {
         {/* Auth */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/signup" element={<AdminSignup />} />
+        <Route path="/email-verification" element={<EmailVerification />} />
 
         <Route path="/forgot-password" element={<AdminForgotPassword />} />
         <Route path="/verify-code" element={<AdminForgotPassword2 />} />
@@ -34,14 +35,15 @@ export default function App() {
         <Route path="/success-password" element={<AdminForgotPassword4 />} />
 
         {/* 🔥 ADMIN AREA WITH SIDEBAR */}
-        {/* <Route path="/admin" element={<AdminPageLayout />}> */}
+        <Route path="/admin" element={<AdminPageLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="users" element={<Users />} />
           <Route path="recruiters" element={<Recruiters />} />
           <Route path="documents/students" element={<StudentDocuments />} />
           <Route path="documents/recruiters" element={<RecruiterDocuments />} />
         <Route path="admin/signup" element={<AdminSignup />} />
-        <Route path="/email-verification" element={<EmailVerification />} />
+        </Route>
+        
 
 
         {/* Admin */}
