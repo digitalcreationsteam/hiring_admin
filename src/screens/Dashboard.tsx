@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import API from "../common/API";
 import { URL_PATH } from "../common/URL_PATH";
+import AdminSidebar from "ui/components/AdminSidebar";
 
 export default function DashboardRight() {
   const [stats, setStats] = useState({ totalUsers: 0, totalRecruiters: 0 });
@@ -10,7 +11,12 @@ export default function DashboardRight() {
     (async () => {
       try {
         const res = await API("GET", URL_PATH.adminStats);
-        if (res?.success) setStats(res.data);
+if (res?.success && res.data) {
+  setStats({
+    totalUsers: res.data.totalUsers ?? 0,
+    totalRecruiters: res.data.totalRecruiters ?? 0,
+  });
+}
       } catch (err) {
         console.error("Stats fetch error:", err);
       } finally {

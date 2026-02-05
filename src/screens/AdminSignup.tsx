@@ -69,30 +69,7 @@ function AdminSignup() {
   // ------------------
   // Submit handler (API-ready)
   // ------------------
-  // const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   if (loading) return;
-  //   if (!validate()) return;
 
-  //   setLoading(true);
-  //   setError("");
-
-  //   // ⛔ TEMP: simulate signup flow
-  //   setTimeout(() => {
-  //     setLoading(false);
-  //     navigate("/admin/login");
-  //   }, 900);
-
-  //   /*
-  //     🔌 FUTURE
-  //     API("POST", "/admin/signup", {
-  //       firstName,
-  //       lastName,
-  //       email,
-  //       password,
-  //     });
-  //   */
-  // };
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
   if (loading || !validate()) return;
@@ -117,7 +94,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     localStorage.setItem("token", response.token);
 
     // ✅ After admin signup → go to admin login
-    navigate("/admin/login", { replace: true });
+    navigate("/email-verification", { replace: true });
 
   } catch (err: any) {
     setError(err?.message || "Unable to create admin account");
@@ -125,6 +102,47 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setLoading(false);
   }
 };
+// const handleSubmit = async (e: any) => {
+//   e.preventDefault();
+//   if (loading) return;
+//   if (!validate()) return;
+
+//   setLoading(true);
+//   setError("");
+
+//   const formData = { email, firstname, lastname, password,  role  };
+
+//   try {
+//     const res = await API("POST", URL_PATH.signup, formData);
+
+//     if (res?.success) {
+//       // ✅ store token
+//       localStorage.setItem("token", res.token);
+//       localStorage.setItem("signupEmail", email);
+
+//       // Redirect immediately to verify-email page
+//      if (res?.success) {
+//   localStorage.setItem("token", res.token);
+//   localStorage.setItem("signupEmail", email);
+
+//   // ✅ store role too (optional but useful)
+//   localStorage.setItem("role", role);
+
+//   // ✅ redirect based on role
+//   if (role === "admin") return navigate("/admin/dashboard");
+//   if (role === "recruiter") return navigate("/recruiter/dashboard");
+
+//   // student default flow
+//   return navigate("/verify-email");
+// }
+
+//     }
+//   } catch (err: any) {
+//     setError(err?.message || "Unable to create account. Please try again.");
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 
   // ------------------
   // OAuth placeholder
