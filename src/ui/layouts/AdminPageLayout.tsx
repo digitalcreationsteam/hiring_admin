@@ -81,18 +81,18 @@ export default function AdminPageLayout() {
         {/* MENU */}
         <div className="flex flex-col gap-1">
           <Item
-            to="/dashboard"
+            to="/admin/dashboard"
             icon={<FeatherHome className="w-5 h-5" />}
             label="Dashboard"
           />
 
           <Item
-            to="/users"
+            to="/admin/users"
             icon={<FeatherUsers className="w-5 h-5" />}
             label="Users"
           />
           <Item
-            to="/Recruiters"
+            to="/admin/Recruiters"
             icon={<FeatherHeadphones className="w-5 h-5" />}
             label="Recruiters"
           />
@@ -120,7 +120,7 @@ export default function AdminPageLayout() {
             }`}
           >
             <NavLink
-              to="/jobs/all"
+              to="/admin/documents/recruiters"
               className={({ isActive }) =>
                 `${base} ${isActive ? active : inactive} py-2 text-[13px]`
               }
@@ -128,7 +128,7 @@ export default function AdminPageLayout() {
               Recruiter Documents
             </NavLink>
             <NavLink
-              to="/jobs/create"
+              to="/admin/documents/students"
               className={({ isActive }) =>
                 `${base} ${isActive ? active : inactive} py-2 text-[13px]`
               }
@@ -140,7 +140,6 @@ export default function AdminPageLayout() {
           
         </div>
 
-        {/* Bottom logout */}
       {/* Bottom logout */}
 <div className="mt-auto pt-6">
   <button
