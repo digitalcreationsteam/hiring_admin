@@ -15,7 +15,6 @@ export default function DashboardRight() {
     (async () => {
       try {
         const res = await API("GET", URL_PATH.adminStats);
-        console.log("ADMIN STATS RESPONSE:", res);
 
         if (res?.success && res?.data) {
           setStats({

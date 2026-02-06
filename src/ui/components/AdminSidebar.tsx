@@ -69,7 +69,7 @@ className="flex flex-col w-[280px] h-screen sticky top-0 px-4 py-5 border-r bord
           H
         </div>
         <div className="leading-tight">
-          <div className="text-white font-semibold text-lg">EmployX</div>
+          <div className="text-white font-semibold text-lg">UniTalent</div>
           <div className="text-xs text-white/50">Admin</div>
         </div>
       </div>
