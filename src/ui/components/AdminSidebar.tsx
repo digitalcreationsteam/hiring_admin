@@ -57,14 +57,14 @@ export default function AdminSidebar() {
 className="flex flex-col w-[280px] h-screen sticky top-0 px-4 py-5 border-r border-white/10"
       style={{
         background:
-          "linear-gradient(180deg, ${colors.sidebar} 0%, #14162A 40%, #121328 100%)",
+          "linear-gradient(180deg, ${colors.sidebar} 0%, #2a2914 40%, #121328 100%)",
       }}
     >
       {/* Brand */}
       <div className="flex items-center gap-3 px-2 pb-5">
         <div
           className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold"
-          style={{ backgroundColor: colors.primary }}
+          style={{ backgroundColor: colors.textPrimary }}
         >
           H
         </div>
@@ -153,3 +153,4 @@ className="flex flex-col w-[280px] h-screen sticky top-0 px-4 py-5 border-r bord
     </aside>
   );
 }
+
