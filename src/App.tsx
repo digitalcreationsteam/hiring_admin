@@ -10,6 +10,7 @@ import AdminForgotPassword3 from "./screens/AdminForgotPassword3";
 import AdminForgotPassword4 from "./screens/AdminForgotPassword4";
 
 import Users from "./screens/Users";
+import Analytics from "screens/Analytics";
 import Recruiters from "./screens/Recruiters";
 import StudentDocuments from "./screens/StudentDocuments";
 import RecruiterDocuments from "./screens/RecruiterDocuments";
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/admin" element={<AdminPageLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="users" element={<Users />} />
+          <Route path="/admin/analytics" element={<Analytics />} />
           <Route path="recruiters" element={<Recruiters />} />
           <Route path="documents/students" element={<StudentDocuments />} />
           <Route path="documents/recruiters" element={<RecruiterDocuments />} />

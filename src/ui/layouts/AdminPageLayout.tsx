@@ -7,6 +7,7 @@ import {
   FeatherHome,
   FeatherFile,
   FeatherUsers,
+  FeatherPieChart,
   FeatherBriefcase,
   FeatherChevronRight,
   FeatherChevronDown,
@@ -15,11 +16,12 @@ import {
   FeatherBell,
   FeatherSettings,
   FeatherMenu,
-  FeatherX
+  FeatherX,
 } from "@subframe/core";
 import { colors } from "../../common/colors";
 
-const base = "flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all";
+const base =
+  "flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all";
 const inactive = `hover:bg-[${colors.background}] text-[${colors.textSecondary}] hover:text-[${colors.textPrimary}]`;
 const active = `bg-[${colors.primary}10] text-[${colors.primary}] font-medium border-l-4 border-[${colors.primary}]`;
 
@@ -37,14 +39,20 @@ function Item({ to, icon, label, collapsed, badge }: any) {
       <span className="w-5 h-5 flex items-center justify-center relative">
         {icon}
         {badge && (
-          <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full" style={{ background: colors.error }}></span>
+          <span
+            className="absolute -top-1 -right-1 w-2 h-2 rounded-full"
+            style={{ background: colors.error }}
+          ></span>
         )}
       </span>
       {!collapsed && (
         <div className="flex-1 flex items-center justify-between">
           <span>{label}</span>
           {badge && (
-            <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: `${colors.error}20`, color: colors.error }}>
+            <span
+              className="text-xs px-1.5 py-0.5 rounded-full"
+              style={{ background: `${colors.error}20`, color: colors.error }}
+            >
               {badge}
             </span>
           )}
@@ -71,7 +79,7 @@ export default function AdminPageLayout() {
   const adminName = localStorage.getItem("adminName") || "Admin";
   const adminInitials = adminName
     .split(" ")
-    .map(n => n[0])
+    .map((n) => n[0])
     .join("")
     .toUpperCase()
     .slice(0, 2);
@@ -89,10 +97,13 @@ export default function AdminPageLayout() {
   ];
 
   return (
-    <div className="flex min-h-screen w-full" style={{ background: colors.background }}>
+    <div
+      className="flex min-h-screen w-full"
+      style={{ background: colors.background }}
+    >
       {/* Sidebar Backdrop for Mobile */}
       {!collapsed && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setCollapsed(true)}
         />
@@ -107,7 +118,7 @@ export default function AdminPageLayout() {
         `}
         style={{
           background: colors.surface,
-          borderRight: `1px solid ${colors.border}`
+          borderRight: `1px solid ${colors.border}`,
         }}
       >
         {/* Brand */}
@@ -119,10 +130,10 @@ export default function AdminPageLayout() {
             {!collapsed && (
               <div className="flex-1">
                 <img
-                className="h-12 w-full"
-                src="/hiringLogo.png"
-                alt="Company logo"
-              />
+                  className="h-12 w-full"
+                  src="/UniTalent.png"
+                  alt="Company logo"
+                />
                 {/* <div className="font-bold" style={{ color: colors.textPrimary }}>UniTalhfjhent</div>
                 <div className="text-xs" style={{ color: colors.textSecondary }}>Admin Panel</div> */}
               </div>
@@ -154,6 +165,13 @@ export default function AdminPageLayout() {
           />
 
           <Item
+            to="/admin/analytics"
+            icon={<FeatherPieChart style={{ color: colors.textSecondary }} />}
+            label="Analytics"
+            collapsed={collapsed}
+          />
+
+          <Item
             to="/admin/recruiters"
             icon={<FeatherBriefcase style={{ color: colors.textSecondary }} />}
             label="Recruiters"
@@ -173,9 +191,15 @@ export default function AdminPageLayout() {
                 <>
                   <span className="flex-1 text-left">Documents</span>
                   {documentsOpen ? (
-                    <FeatherChevronDown className="w-4 h-4" style={{ color: colors.textSecondary }} />
+                    <FeatherChevronDown
+                      className="w-4 h-4"
+                      style={{ color: colors.textSecondary }}
+                    />
                   ) : (
-                    <FeatherChevronRight className="w-4 h-4" style={{ color: colors.textSecondary }} />
+                    <FeatherChevronRight
+                      className="w-4 h-4"
+                      style={{ color: colors.textSecondary }}
+                    />
                   )}
                 </>
               )}
@@ -216,13 +240,31 @@ export default function AdminPageLayout() {
         <div className="p-4 border-t" style={{ borderColor: colors.border }}>
           {!collapsed ? (
             <div className="space-y-3">
-              <div className="flex items-center gap-3 p-2 rounded-lg" style={{ background: colors.background }}>
-                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: colors.textPrimary }}>
-                  <span className="text-white font-semibold">{adminInitials}</span>
+              <div
+                className="flex items-center gap-3 p-2 rounded-lg"
+                style={{ background: colors.background }}
+              >
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{ background: colors.textPrimary }}
+                >
+                  <span className="text-white font-semibold">
+                    {adminInitials}
+                  </span>
                 </div>
                 <div className="flex-1">
-                  <div className="font-medium" style={{ color: colors.textPrimary }}>{adminName}</div>
-                  <div className="text-xs" style={{ color: colors.textSecondary }}>Administrator</div>
+                  <div
+                    className="font-medium"
+                    style={{ color: colors.textPrimary }}
+                  >
+                    {adminName}
+                  </div>
+                  <div
+                    className="text-xs"
+                    style={{ color: colors.textSecondary }}
+                  >
+                    Administrator
+                  </div>
                 </div>
               </div>
               <button
@@ -236,8 +278,13 @@ export default function AdminPageLayout() {
             </div>
           ) : (
             <div className="flex flex-col items-center space-y-3">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: colors.textPrimary }}>
-                <span className="text-white font-semibold text-sm">{adminInitials}</span>
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ background: colors.textPrimary }}
+              >
+                <span className="text-white font-semibold text-sm">
+                  {adminInitials}
+                </span>
               </div>
               <button
                 onClick={logout}
@@ -255,7 +302,10 @@ export default function AdminPageLayout() {
       {/* Main Content */}
       <main className="flex-1 min-w-0">
         {/* Top Header */}
-        <header className="sticky top-0 z-40 border-b" style={{ background: colors.surface, borderColor: colors.border }}>
+        <header
+          className="sticky top-0 z-40 border-b"
+          style={{ background: colors.surface, borderColor: colors.border }}
+        >
           <div className="h-16 px-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
@@ -266,26 +316,25 @@ export default function AdminPageLayout() {
                 <FeatherMenu className="w-5 h-5" />
               </button>
 
-             {/* Search */}
-<div className="relative rounded-full border border-gray-800 overflow-hidden">
-  <FeatherSearch
-    className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5"
-    style={{ color: colors.textTertiary }}
-  />
+              {/* Search */}
+              <div className="relative rounded-full border border-gray-800 overflow-hidden">
+                <FeatherSearch
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5"
+                  style={{ color: colors.textTertiary }}
+                />
 
-  <input
-    type="text"
-    placeholder="Search users, documents, settings..."
-    value={searchQuery}
-    onChange={(e) => setSearchQuery(e.target.value)}
-    className="w-full pl-12 pr-4 py-3 rounded-full text-sm focus:outline-none"
-    style={{
-      background: colors.background,
-      color: colors.textPrimary,
-    }}
-  />
-</div>
-
+                <input
+                  type="text"
+                  placeholder="Search users, documents, settings..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 rounded-full text-sm focus:outline-none"
+                  style={{
+                    background: colors.background,
+                    color: colors.textPrimary,
+                  }}
+                />
+              </div>
             </div>
 
             {/* Right Actions */}
@@ -298,7 +347,10 @@ export default function AdminPageLayout() {
                   style={{ color: colors.textSecondary }}
                 >
                   <FeatherBell className="w-5 h-5" />
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full" style={{ background: colors.error }}></span>
+                  <span
+                    className="absolute top-1 right-1 w-2 h-2 rounded-full"
+                    style={{ background: colors.error }}
+                  ></span>
                 </button>
 
                 {showNotifications && (
@@ -307,11 +359,29 @@ export default function AdminPageLayout() {
                       className="fixed inset-0 z-10"
                       onClick={() => setShowNotifications(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-80 rounded-xl shadow-lg z-20"
-                      style={{ background: colors.surface, border: `1px solid ${colors.border}` }}>
-                      <div className="p-4 border-b" style={{ borderColor: colors.border }}>
-                        <div className="font-semibold" style={{ color: colors.textPrimary }}>Notifications</div>
-                        <div className="text-xs" style={{ color: colors.textSecondary }}>You have {notifications.length} unread</div>
+                    <div
+                      className="absolute right-0 mt-2 w-80 rounded-xl shadow-lg z-20"
+                      style={{
+                        background: colors.surface,
+                        border: `1px solid ${colors.border}`,
+                      }}
+                    >
+                      <div
+                        className="p-4 border-b"
+                        style={{ borderColor: colors.border }}
+                      >
+                        <div
+                          className="font-semibold"
+                          style={{ color: colors.textPrimary }}
+                        >
+                          Notifications
+                        </div>
+                        <div
+                          className="text-xs"
+                          style={{ color: colors.textSecondary }}
+                        >
+                          You have {notifications.length} unread
+                        </div>
                       </div>
                       <div className="max-h-96 overflow-y-auto">
                         {notifications.map((notification) => (
@@ -320,13 +390,29 @@ export default function AdminPageLayout() {
                             className="p-4 border-b hover:bg-gray-50 cursor-pointer"
                             style={{ borderColor: colors.border }}
                           >
-                            <div className="font-medium" style={{ color: colors.textPrimary }}>{notification.text}</div>
-                            <div className="text-xs mt-1" style={{ color: colors.textSecondary }}>{notification.time}</div>
+                            <div
+                              className="font-medium"
+                              style={{ color: colors.textPrimary }}
+                            >
+                              {notification.text}
+                            </div>
+                            <div
+                              className="text-xs mt-1"
+                              style={{ color: colors.textSecondary }}
+                            >
+                              {notification.time}
+                            </div>
                           </div>
                         ))}
                       </div>
-                      <div className="p-3 border-t" style={{ borderColor: colors.border }}>
-                        <button className="w-full text-center text-sm hover:text-blue-700" style={{ color: colors.primary }}>
+                      <div
+                        className="p-3 border-t"
+                        style={{ borderColor: colors.border }}
+                      >
+                        <button
+                          className="w-full text-center text-sm hover:text-blue-700"
+                          style={{ color: colors.primary }}
+                        >
                           View all notifications
                         </button>
                       </div>
@@ -336,52 +422,57 @@ export default function AdminPageLayout() {
               </div>
 
               {/* Settings */}
-              <button className="p-2 rounded-lg hover:bg-gray-100" style={{ color: colors.textSecondary }}>
+              <button
+                className="p-2 rounded-lg hover:bg-gray-100"
+                style={{ color: colors.textSecondary }}
+              >
                 <FeatherSettings className="w-5 h-5" />
               </button>
 
               {/* Divider */}
-             {/* Divider */}
-<div className="h-6 w-px" style={{ background: colors.border }}></div>
+              {/* Divider */}
+              <div
+                className="h-6 w-px"
+                style={{ background: colors.border }}
+              ></div>
 
-{/* Logout button */}
-<button
-  onClick={logout}
-  className="px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-red-50"
-  style={{ color: colors.error}}
->
-  Logout
-</button>
+              {/* Logout button */}
+              <button
+                onClick={logout}
+                className="px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-red-50"
+                style={{ color: colors.error }}
+              >
+                Logout
+              </button>
 
-{/* User Profile */}
-{collapsed && (
-  <div className="flex items-center gap-3">
-    <div className="text-right">
-      <div
-        className="text-sm font-medium"
-        style={{ color: colors.textPrimary }}
-      >
-        {adminName}
-      </div>
-      <div
-        className="text-xs"
-        style={{ color: colors.textSecondary }}
-      >
-        Admin
-      </div>
-    </div>
+              {/* User Profile */}
+              {collapsed && (
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <div
+                      className="text-sm font-medium"
+                      style={{ color: colors.textPrimary }}
+                    >
+                      {adminName}
+                    </div>
+                    <div
+                      className="text-xs"
+                      style={{ color: colors.textSecondary }}
+                    >
+                      Admin
+                    </div>
+                  </div>
 
-    <div
-      className="w-9 h-9 rounded-full flex items-center justify-center"
-      style={{ background: colors.textPrimary }}
-    >
-      <span className="text-white text-sm font-semibold">
-        {adminInitials}
-      </span>
-    </div>
-  </div>
-)}
-
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center"
+                    style={{ background: colors.textPrimary }}
+                  >
+                    <span className="text-white text-sm font-semibold">
+                      {adminInitials}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>

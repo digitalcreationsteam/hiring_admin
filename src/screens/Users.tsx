@@ -11,7 +11,7 @@ import {
   FeatherRefreshCw,
   FeatherSearch,
   FeatherChevronDown,
-  FeatherStar
+  FeatherStar,
 } from "@subframe/core";
 import { colors } from "../common/colors";
 
@@ -23,8 +23,14 @@ type UserRow = {
   role: "student" | "recruiter" | "admin";
   createdAt: string;
   updatedAt: string;
-  status?: 'active' | 'pending' | 'inactive';
+  status?: "active" | "pending" | "inactive";
   lastLogin?: string;
+
+  location?: {
+    country?: string;
+    city?: string;
+    university?: string;
+  };
 };
 
 type ScoreRow = {
@@ -50,27 +56,39 @@ type ScoreRow = {
 
 function Pill({ label, value }: { label: string; value: any }) {
   return (
-    <div className="flex justify-between p-3 rounded-lg text-sm" style={{ background: `${colors.background}50` }}>
+    <div
+      className="flex justify-between p-3 rounded-lg text-sm"
+      style={{ background: `${colors.background}50` }}
+    >
       <span style={{ color: colors.textSecondary }}>{label}</span>
-      <span className="font-semibold" style={{ color: colors.textPrimary }}>{value ?? "-"}</span>
+      <span className="font-semibold" style={{ color: colors.textPrimary }}>
+        {value ?? "-"}
+      </span>
     </div>
   );
 }
 
 function StatusBadge({ status }: { status?: string }) {
   const getStatusColor = () => {
-    switch(status) {
-      case 'active': return { bg: `${colors.success}20`, text: colors.success };
-      case 'pending': return { bg: `${colors.warning}20`, text: colors.warning };
-      case 'inactive': return { bg: `${colors.error}20`, text: colors.error };
-      default: return { bg: `${colors.secondary}50`, text: colors.textSecondary };
+    switch (status) {
+      case "active":
+        return { bg: `${colors.success}20`, text: colors.success };
+      case "pending":
+        return { bg: `${colors.warning}20`, text: colors.warning };
+      case "inactive":
+        return { bg: `${colors.error}20`, text: colors.error };
+      default:
+        return { bg: `${colors.secondary}50`, text: colors.textSecondary };
     }
   };
 
   const color = getStatusColor();
 
   return (
-    <span className="px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ background: color.bg, color: color.text }}>
+    <span
+      className="px-2.5 py-0.5 rounded-full text-xs font-medium"
+      style={{ background: color.bg, color: color.text }}
+    >
       {status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown"}
     </span>
   );
@@ -83,6 +101,10 @@ export default function Users() {
   const [filter, setFilter] = useState<string>("all");
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
+  const [countryFilter, setCountryFilter] = useState("all");
+  const [cityFilter, setCityFilter] = useState("all");
+  const [universityFilter, setUniversityFilter] = useState("all");
+
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
   const [score, setScore] = useState<ScoreRow | null>(null);
@@ -93,18 +115,57 @@ export default function Users() {
     [users],
   );
 
+  const countries = Array.from(
+    new Set(users.map((u) => u.location?.country).filter(Boolean) as string[]),
+  );
+
+  const cities = Array.from(
+    new Set(users.map((u) => u.location?.city).filter(Boolean) as string[]),
+  );
+
+  const universities = Array.from(
+    new Set(
+      users.map((u) => u.location?.university).filter(Boolean) as string[],
+    ),
+  );
+
   const filteredStudents = useMemo(() => {
-    return students.filter(student => {
-      const matchesSearch = search === "" || 
+    return students.filter((student) => {
+      const matchesSearch =
+        search === "" ||
         student.firstname.toLowerCase().includes(search.toLowerCase()) ||
         student.lastname?.toLowerCase().includes(search.toLowerCase()) ||
         student.email.toLowerCase().includes(search.toLowerCase());
-      
+
       const matchesFilter = filter === "all" || student.status === filter;
-      
-      return matchesSearch && matchesFilter;
+
+      const matchesCountry =
+        countryFilter === "all" || student.location?.country === countryFilter;
+
+      const matchesCity =
+        cityFilter === "all" || student.location?.city === cityFilter;
+
+      const matchesUniversity =
+        universityFilter === "all" ||
+        student.location?.university === universityFilter;
+
+      return (
+  matchesSearch &&
+  matchesFilter &&
+  matchesCountry &&
+  matchesCity &&
+  matchesUniversity
+);
+
     });
-  }, [students, search, filter]);
+  }, [
+  students,
+  search,
+  filter,
+  countryFilter,
+  cityFilter,
+  universityFilter
+]);
 
   useEffect(() => {
     fetchUsers();
@@ -157,10 +218,8 @@ export default function Users() {
   };
 
   const toggleRow = (id: string) => {
-    setSelectedRows(prev =>
-      prev.includes(id)
-        ? prev.filter(rowId => rowId !== id)
-        : [...prev, id]
+    setSelectedRows((prev) =>
+      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id],
     );
   };
 
@@ -168,7 +227,7 @@ export default function Users() {
     if (selectedRows.length === filteredStudents.length) {
       setSelectedRows([]);
     } else {
-      setSelectedRows(filteredStudents.map(u => u._id));
+      setSelectedRows(filteredStudents.map((u) => u._id));
     }
   };
 
@@ -181,12 +240,33 @@ export default function Users() {
   };
 
   return (
-    <div className="rounded-xl" style={{ background: colors.surface, border: `1px solid ${colors.border}` }}>
+    <div
+      className="rounded-xl"
+      style={{
+        background: colors.surface,
+        border: `1px solid ${colors.border}`,
+      }}
+    >
       {/* Header */}
       <div className="p-6 border-b" style={{ borderColor: colors.border }}>
+       <div className="mt-4">
+  <div className="text-sm" style={{ color: colors.textSecondary }}>
+    Total Students
+  </div>
+  <div className="text-2xl font-semibold" style={{ color: colors.textPrimary }}>
+    {students.length}
+  </div>
+</div>
+
+
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold" style={{ color: colors.textPrimary }}>Students</h1>
+            <h1
+              className="text-xl mt-6 font-semibold"
+              style={{ color: colors.textPrimary }}
+            >
+              Students
+            </h1>
             <p className="text-sm mt-1" style={{ color: colors.textSecondary }}>
               Manage and monitor student accounts
             </p>
@@ -215,30 +295,33 @@ export default function Users() {
         <div className="flex items-center justify-between mt-6">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <FeatherSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: colors.textTertiary }} />
+              <FeatherSearch
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+                style={{ color: colors.textTertiary }}
+              />
               <input
                 type="text"
                 placeholder="Search students..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10 pr-4 py-2.5 rounded-full focus:outline-none"
-                style={{ 
+                style={{
                   border: `1px solid ${colors.border}`,
                   background: colors.background,
-                  color: colors.textPrimary
+                  color: colors.textPrimary,
                 }}
               />
             </div>
-            
+
             <div className="relative">
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 className="appearance-none pl-4 pr-10 py-2.5 rounded-full focus:outline-none"
-                style={{ 
+                style={{
                   border: `1px solid ${colors.border}`,
                   background: colors.background,
-                  color: colors.textPrimary
+                  color: colors.textPrimary,
                 }}
               >
                 <option value="all">All Status</option>
@@ -246,8 +329,85 @@ export default function Users() {
                 <option value="pending">Pending</option>
                 <option value="inactive">Inactive</option>
               </select>
-              <FeatherChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none" style={{ color: colors.textTertiary }} />
+              <FeatherChevronDown
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none"
+                style={{ color: colors.textTertiary }}
+              />
             </div>
+          <div className="relative">
+  <select
+    value={countryFilter}
+    onChange={(e) => setCountryFilter(e.target.value)}
+    className="appearance-none pl-4 pr-10 py-2.5 rounded-full"
+    style={{
+      border: `1px solid ${colors.border}`,
+      background: colors.background,
+      color: colors.textPrimary,
+    }}
+  >
+    <option value="all">Country</option>
+    {countries.map((c) => (
+      <option key={c} value={c}>{c}</option>
+    ))}
+  </select>
+
+  <FeatherChevronDown
+    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+    style={{ color: colors.textTertiary }}
+  />
+</div>
+
+
+<div className="relative">
+  <select
+    value={cityFilter}
+    onChange={(e) => setCityFilter(e.target.value)}
+    className="appearance-none pl-4 pr-10 py-2.5 rounded-full"
+    style={{
+      border: `1px solid ${colors.border}`,
+      background: colors.background,
+      color: colors.textPrimary,
+    }}
+  >
+    <option value="all">City</option>
+    {cities.map((c) => (
+      <option key={c} value={c}>{c}</option>
+    ))}
+  </select>
+
+  <FeatherChevronDown
+    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+    style={{ color: colors.textTertiary }}
+  />
+</div>
+
+
+
+<div className="relative">
+  <select
+    value={universityFilter}
+    onChange={(e) => setUniversityFilter(e.target.value)}
+    className="appearance-none pl-4 pr-10 py-2.5 rounded-full"
+    style={{
+      border: `1px solid ${colors.border}`,
+      background: colors.background,
+      color: colors.textPrimary,
+    }}
+  >
+    <option value="all">University</option>
+    {universities.map((u) => (
+      <option key={u} value={u}>{u}</option>
+    ))}
+  </select>
+
+  <FeatherChevronDown
+    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+    style={{ color: colors.textTertiary }}
+  />
+</div>
+
+
+
           </div>
 
           {selectedRows.length > 0 && (
@@ -278,32 +438,59 @@ export default function Users() {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b" style={{ borderColor: colors.border, background: `${colors.background}50` }}>
+            <tr
+              className="border-b"
+              style={{
+                borderColor: colors.border,
+                background: `${colors.background}50`,
+              }}
+            >
               <th className="px-6 py-3 text-left">
                 <input
                   type="checkbox"
-                  checked={selectedRows.length === filteredStudents.length && filteredStudents.length > 0}
+                  checked={
+                    selectedRows.length === filteredStudents.length &&
+                    filteredStudents.length > 0
+                  }
                   onChange={toggleAllRows}
                   className="rounded focus:ring-0"
                   style={{ borderColor: colors.border, color: colors.primary }}
                 />
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.textSecondary }}>
+              <th
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                style={{ color: colors.textSecondary }}
+              >
                 Student
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.textSecondary }}>
+              <th
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                style={{ color: colors.textSecondary }}
+              >
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.textSecondary }}>
+              <th
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                style={{ color: colors.textSecondary }}
+              >
                 Email
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.textSecondary }}>
+              <th
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                style={{ color: colors.textSecondary }}
+              >
                 Created
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.textSecondary }}>
+              <th
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                style={{ color: colors.textSecondary }}
+              >
                 Last Login
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.textSecondary }}>
+              <th
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                style={{ color: colors.textSecondary }}
+              >
                 Actions
               </th>
             </tr>
@@ -313,8 +500,16 @@ export default function Users() {
               <tr>
                 <td colSpan={7} className="px-6 py-8 text-center">
                   <div className="flex flex-col items-center justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: colors.primary }}></div>
-                    <div className="mt-3" style={{ color: colors.textSecondary }}>Loading students...</div>
+                    <div
+                      className="animate-spin rounded-full h-8 w-8 border-b-2"
+                      style={{ borderColor: colors.primary }}
+                    ></div>
+                    <div
+                      className="mt-3"
+                      style={{ color: colors.textSecondary }}
+                    >
+                      Loading students...
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -322,9 +517,17 @@ export default function Users() {
               <tr>
                 <td colSpan={7} className="px-6 py-8 text-center">
                   <div className="flex flex-col items-center justify-center">
-                    <FeatherSearch className="w-12 h-12 mb-3" style={{ color: colors.secondary }} />
-                    <div style={{ color: colors.textSecondary }}>No students found</div>
-                    <div className="text-sm mt-1" style={{ color: colors.textTertiary }}>
+                    <FeatherSearch
+                      className="w-12 h-12 mb-3"
+                      style={{ color: colors.secondary }}
+                    />
+                    <div style={{ color: colors.textSecondary }}>
+                      No students found
+                    </div>
+                    <div
+                      className="text-sm mt-1"
+                      style={{ color: colors.textTertiary }}
+                    >
                       Try adjusting your search or filter
                     </div>
                   </div>
@@ -337,27 +540,43 @@ export default function Users() {
                   className="hover:bg-gray-50 cursor-pointer transition-colors"
                   onClick={() => openStudent(u)}
                 >
-                  <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                  <td
+                    className="px-6 py-4"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <input
                       type="checkbox"
                       checked={selectedRows.includes(u._id)}
                       onChange={() => toggleRow(u._id)}
                       className="rounded focus:ring-0"
-                      style={{ borderColor: colors.border, color: colors.primary }}
+                      style={{
+                        borderColor: colors.border,
+                        color: colors.primary,
+                      }}
                     />
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: colors.lightprimary }}>
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center"
+                        style={{ background: colors.lightprimary }}
+                      >
                         <span className="text-gray-800 text-sm font-medium">
-                          {u.firstname[0]}{u.lastname?.[0] || u.firstname[1] || ""}
+                          {u.firstname[0]}
+                          {u.lastname?.[0] || u.firstname[1] || ""}
                         </span>
                       </div>
                       <div>
-                        <div className="font-medium" style={{ color: colors.textPrimary }}>
+                        <div
+                          className="font-medium"
+                          style={{ color: colors.textPrimary }}
+                        >
                           {u.firstname} {u.lastname}
                         </div>
-                        <div className="text-xs" style={{ color: colors.textTertiary }}>
+                        <div
+                          className="text-xs"
+                          style={{ color: colors.textTertiary }}
+                        >
                           ID: {u._id.slice(-8)}
                         </div>
                       </div>
@@ -373,13 +592,21 @@ export default function Users() {
                     <div style={{ color: colors.textPrimary }}>
                       {new Date(u.createdAt).toLocaleDateString()}
                     </div>
-                    <div className="text-xs" style={{ color: colors.textTertiary }}>
-                      {new Date(u.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    <div
+                      className="text-xs"
+                      style={{ color: colors.textTertiary }}
+                    >
+                      {new Date(u.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div style={{ color: colors.textPrimary }}>
-                      {u.lastLogin ? new Date(u.lastLogin).toLocaleDateString() : "Never"}
+                      {u.lastLogin
+                        ? new Date(u.lastLogin).toLocaleDateString()
+                        : "Never"}
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -421,22 +648,53 @@ export default function Users() {
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-4 border-t flex items-center justify-between" style={{ borderColor: colors.border }}>
+      <div
+        className="px-6 py-4 border-t flex items-center justify-between"
+        style={{ borderColor: colors.border }}
+      >
         <div className="text-sm" style={{ color: colors.textSecondary }}>
-          Showing <span className="font-medium" style={{ color: colors.textPrimary }}>{filteredStudents.length}</span> of{" "}
-          <span className="font-medium" style={{ color: colors.textPrimary }}>{students.length}</span> students
+          Showing{" "}
+          <span className="font-medium" style={{ color: colors.textPrimary }}>
+            {filteredStudents.length}
+          </span>{" "}
+          of{" "}
+          <span className="font-medium" style={{ color: colors.textPrimary }}>
+            {students.length}
+          </span>{" "}
+          students
         </div>
         <div className="flex items-center gap-2">
-          <button className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-50" style={{ border: `1px solid ${colors.border}`, color: colors.textSecondary }}>
+          <button
+            className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-50"
+            style={{
+              border: `1px solid ${colors.border}`,
+              color: colors.textSecondary,
+            }}
+          >
             Previous
           </button>
-          <button className="px-3 py-1.5 text-sm rounded-lg" style={{ background: colors.primary, color: colors.textPrimary }}>
+          <button
+            className="px-3 py-1.5 text-sm rounded-lg"
+            style={{ background: colors.primary, color: colors.textPrimary }}
+          >
             1
           </button>
-          <button className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-50" style={{ border: `1px solid ${colors.border}`, color: colors.textSecondary }}>
+          <button
+            className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-50"
+            style={{
+              border: `1px solid ${colors.border}`,
+              color: colors.textSecondary,
+            }}
+          >
             2
           </button>
-          <button className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-50" style={{ border: `1px solid ${colors.border}`, color: colors.textSecondary }}>
+          <button
+            className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-50"
+            style={{
+              border: `1px solid ${colors.border}`,
+              color: colors.textSecondary,
+            }}
+          >
             Next
           </button>
         </div>
@@ -451,16 +709,35 @@ export default function Users() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="p-6 border-b" style={{ borderColor: colors.border }}>
+            <div
+              className="p-6 border-b"
+              style={{ borderColor: colors.border }}
+            >
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-xl font-bold" style={{ color: colors.textPrimary }}>Student Details</h2>
-                  <p className="text-sm mt-1" style={{ color: colors.textSecondary }}>
-                    {selectedUser ? `${selectedUser.firstname} ${selectedUser.lastname || ""}` : ""}
+                  <h2
+                    className="text-xl font-bold"
+                    style={{ color: colors.textPrimary }}
+                  >
+                    Student Details
+                  </h2>
+                  <p
+                    className="text-sm mt-1"
+                    style={{ color: colors.textSecondary }}
+                  >
+                    {selectedUser
+                      ? `${selectedUser.firstname} ${selectedUser.lastname || ""}`
+                      : ""}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button className="px-4 py-2 text-sm rounded-lg hover:bg-gray-50" style={{ background: `${colors.textPrimary}10`, color: colors.textPrimary }}>
+                  <button
+                    className="px-4 py-2 text-sm rounded-lg hover:bg-gray-50"
+                    style={{
+                      background: `${colors.textPrimary}10`,
+                      color: colors.textPrimary,
+                    }}
+                  >
                     Edit Profile
                   </button>
                   <button
@@ -477,23 +754,44 @@ export default function Users() {
             {/* Modal Content */}
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
               {/* Profile Overview */}
-              <div className="mb-6 p-4 rounded-xl" style={{ background: colors.background }}>
+              <div
+                className="mb-6 p-4 rounded-xl"
+                style={{ background: colors.background }}
+              >
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: colors.textTertiary }}>
+                  <div
+                    className="w-16 h-16 rounded-full flex items-center justify-center"
+                    style={{ background: colors.textTertiary }}
+                  >
                     <span className="text-white text-2xl font-bold">
                       {selectedUser?.firstname[0]}
-                      {selectedUser?.lastname?.[0] || selectedUser?.firstname[1] || ""}
+                      {selectedUser?.lastname?.[0] ||
+                        selectedUser?.firstname[1] ||
+                        ""}
                     </span>
                   </div>
                   <div>
-                    <div className="font-bold" style={{ color: colors.textPrimary }}>
+                    <div
+                      className="font-bold"
+                      style={{ color: colors.textPrimary }}
+                    >
                       {selectedUser?.firstname} {selectedUser?.lastname}
                     </div>
-                    <div style={{ color: colors.textSecondary }}>{selectedUser?.email}</div>
+                    <div style={{ color: colors.textSecondary }}>
+                      {selectedUser?.email}
+                    </div>
                     <div className="flex items-center gap-4 mt-2">
                       <StatusBadge status={selectedUser?.status} />
-                      <div className="text-sm" style={{ color: colors.textTertiary }}>
-                        Member since {selectedUser ? new Date(selectedUser.createdAt).toLocaleDateString() : ""}
+                      <div
+                        className="text-sm"
+                        style={{ color: colors.textTertiary }}
+                      >
+                        Member since{" "}
+                        {selectedUser
+                          ? new Date(
+                              selectedUser.createdAt,
+                            ).toLocaleDateString()
+                          : ""}
                       </div>
                     </div>
                   </div>
@@ -501,15 +799,30 @@ export default function Users() {
               </div>
 
               {/* Tabs */}
-              <div className="border-b mb-6" style={{ borderColor: colors.border }}>
+              <div
+                className="border-b mb-6"
+                style={{ borderColor: colors.border }}
+              >
                 <div className="flex gap-6">
-                  <button className="pb-3 border-b-2 font-medium" style={{ borderColor: colors.textPrimary, color: colors.textPrimary }}>
+                  <button
+                    className="pb-3 border-b-2 font-medium"
+                    style={{
+                      borderColor: colors.textPrimary,
+                      color: colors.textPrimary,
+                    }}
+                  >
                     Scores & Ranks
                   </button>
-                  <button className="pb-3 hover:text-gray-700" style={{ color: colors.textSecondary }}>
+                  <button
+                    className="pb-3 hover:text-gray-700"
+                    style={{ color: colors.textSecondary }}
+                  >
                     Activity Log
                   </button>
-                  <button className="pb-3 hover:text-gray-700" style={{ color: colors.textSecondary }}>
+                  <button
+                    className="pb-3 hover:text-gray-700"
+                    style={{ color: colors.textSecondary }}
+                  >
                     Documents
                   </button>
                 </div>
@@ -519,32 +832,78 @@ export default function Users() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Left Column */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-4" style={{ color: colors.textPrimary }}>Core Scores</h3>
+                  <h3
+                    className="text-lg font-semibold mb-4"
+                    style={{ color: colors.textPrimary }}
+                  >
+                    Core Scores
+                  </h3>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { label: "Hireability Index", value: score?.hireabilityIndex, color: colors.success },
-                      { label: "Experience Index", value: score?.experienceIndexScore, color: colors.success },
-                      { label: "Skill Index", value: score?.skillIndexScore, color: colors.success },
-                      { label: "Education Score", value: score?.educationScore, color: colors.success }
+                      {
+                        label: "Hireability Index",
+                        value: score?.hireabilityIndex,
+                        color: colors.success,
+                      },
+                      {
+                        label: "Experience Index",
+                        value: score?.experienceIndexScore,
+                        color: colors.success,
+                      },
+                      {
+                        label: "Skill Index",
+                        value: score?.skillIndexScore,
+                        color: colors.success,
+                      },
+                      {
+                        label: "Education Score",
+                        value: score?.educationScore,
+                        color: colors.success,
+                      },
                     ].map((item, index) => (
-                      <div key={index} className="p-4 rounded-xl" style={{ background: `${item.color}10` }}>
-                        <div className="text-xs mb-1" style={{ color: item.color }}>{item.label}</div>
-                        <div className="text-2xl font-bold" style={{ color: colors.textPrimary }}>
+                      <div
+                        key={index}
+                        className="p-4 rounded-xl"
+                        style={{ background: `${item.color}10` }}
+                      >
+                        <div
+                          className="text-xs mb-1"
+                          style={{ color: item.color }}
+                        >
+                          {item.label}
+                        </div>
+                        <div
+                          className="text-2xl font-bold"
+                          style={{ color: colors.textPrimary }}
+                        >
                           {item.value ?? "-"}
                         </div>
-                        <div className="text-xs mt-1" style={{ color: colors.textTertiary }}>
-                          {item.label.includes("Index") ? "Overall Score" : "Assessment"}
+                        <div
+                          className="text-xs mt-1"
+                          style={{ color: colors.textTertiary }}
+                        >
+                          {item.label.includes("Index")
+                            ? "Overall Score"
+                            : "Assessment"}
                         </div>
                       </div>
                     ))}
                   </div>
 
                   <div className="mt-6">
-                    <h4 className="text-sm font-medium mb-3" style={{ color: colors.textPrimary }}>Additional Scores</h4>
+                    <h4
+                      className="text-sm font-medium mb-3"
+                      style={{ color: colors.textPrimary }}
+                    >
+                      Additional Scores
+                    </h4>
                     <div className="space-y-2">
                       <Pill label="Work Score" value={score?.workScore} />
                       <Pill label="Award Score" value={score?.awardScore} />
-                      <Pill label="Certification Score" value={score?.certificationScore} />
+                      <Pill
+                        label="Certification Score"
+                        value={score?.certificationScore}
+                      />
                       <Pill label="Project Score" value={score?.projectScore} />
                     </div>
                   </div>
@@ -552,23 +911,64 @@ export default function Users() {
 
                 {/* Right Column */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-4" style={{ color: colors.textPrimary }}>Rankings</h3>
+                  <h3
+                    className="text-lg font-semibold mb-4"
+                    style={{ color: colors.textPrimary }}
+                  >
+                    Rankings
+                  </h3>
                   <div className="grid grid-cols-2 gap-4">
                     {[
-                      { label: "Global Rank", value: score?.globalRank, icon: <FeatherStar className="w-4 h-4" style={{ color: colors.warning }} /> },
-                      { label: "Country Rank", value: score?.countryRank, subtitle: score?.country },
-                      { label: "State Rank", value: score?.stateRank, subtitle: score?.state },
-                      { label: "City Rank", value: score?.cityRank, subtitle: score?.city }
+                      {
+                        label: "Global Rank",
+                        value: score?.globalRank,
+                        icon: (
+                          <FeatherStar
+                            className="w-4 h-4"
+                            style={{ color: colors.warning }}
+                          />
+                        ),
+                      },
+                      {
+                        label: "Country Rank",
+                        value: score?.countryRank,
+                        subtitle: score?.country,
+                      },
+                      {
+                        label: "State Rank",
+                        value: score?.stateRank,
+                        subtitle: score?.state,
+                      },
+                      {
+                        label: "City Rank",
+                        value: score?.cityRank,
+                        subtitle: score?.city,
+                      },
                     ].map((item, index) => (
-                      <div key={index} className="border rounded-xl p-4" style={{ borderColor: colors.border }}>
+                      <div
+                        key={index}
+                        className="border rounded-xl p-4"
+                        style={{ borderColor: colors.border }}
+                      >
                         <div className="flex items-center justify-between mb-2">
-                          <div className="text-xs" style={{ color: colors.textSecondary }}>{item.label}</div>
+                          <div
+                            className="text-xs"
+                            style={{ color: colors.textSecondary }}
+                          >
+                            {item.label}
+                          </div>
                           {item.icon}
                         </div>
-                        <div className="text-3xl font-bold" style={{ color: colors.textPrimary }}>
+                        <div
+                          className="text-3xl font-bold"
+                          style={{ color: colors.textPrimary }}
+                        >
                           #{item.value ?? "-"}
                         </div>
-                        <div className="text-xs mt-1" style={{ color: colors.textTertiary }}>
+                        <div
+                          className="text-xs mt-1"
+                          style={{ color: colors.textTertiary }}
+                        >
                           {item.subtitle || "Worldwide"}
                         </div>
                       </div>
@@ -576,15 +976,32 @@ export default function Users() {
                   </div>
 
                   <div className="mt-6">
-                    <h4 className="text-sm font-medium mb-3" style={{ color: colors.textPrimary }}>Location</h4>
-                    <div className="p-4 rounded-xl" style={{ background: colors.background }}>
-                      <div className="text-sm" style={{ color: colors.textPrimary }}>
+                    <h4
+                      className="text-sm font-medium mb-3"
+                      style={{ color: colors.textPrimary }}
+                    >
+                      Location
+                    </h4>
+                    <div
+                      className="p-4 rounded-xl"
+                      style={{ background: colors.background }}
+                    >
+                      <div
+                        className="text-sm"
+                        style={{ color: colors.textPrimary }}
+                      >
                         {[score?.city, score?.state, score?.country]
                           .filter(Boolean)
                           .join(", ") || "Location not specified"}
                       </div>
-                      <div className="text-xs mt-2" style={{ color: colors.textTertiary }}>
-                        Last updated: {score?.updatedAt ? new Date(score.updatedAt).toLocaleDateString() : "-"}
+                      <div
+                        className="text-xs mt-2"
+                        style={{ color: colors.textTertiary }}
+                      >
+                        Last updated:{" "}
+                        {score?.updatedAt
+                          ? new Date(score.updatedAt).toLocaleDateString()
+                          : "-"}
                       </div>
                     </div>
                   </div>
@@ -594,17 +1011,30 @@ export default function Users() {
               {/* Loading State */}
               {detailsLoading && (
                 <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto" style={{ borderColor: colors.primary }}></div>
-                  <div className="mt-3" style={{ color: colors.textSecondary }}>Loading student details...</div>
+                  <div
+                    className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto"
+                    style={{ borderColor: colors.primary }}
+                  ></div>
+                  <div className="mt-3" style={{ color: colors.textSecondary }}>
+                    Loading student details...
+                  </div>
                 </div>
               )}
 
               {/* No Data State */}
               {!detailsLoading && !score && (
                 <div className="text-center py-8">
-                  <FeatherSearch className="w-12 h-12 mx-auto mb-3" style={{ color: colors.secondary }} />
-                  <div style={{ color: colors.textSecondary }}>No score/rank data available</div>
-                  <div className="text-sm mt-1" style={{ color: colors.textTertiary }}>
+                  <FeatherSearch
+                    className="w-12 h-12 mx-auto mb-3"
+                    style={{ color: colors.secondary }}
+                  />
+                  <div style={{ color: colors.textSecondary }}>
+                    No score/rank data available
+                  </div>
+                  <div
+                    className="text-sm mt-1"
+                    style={{ color: colors.textTertiary }}
+                  >
                     This student hasn't completed their profile assessment yet
                   </div>
                 </div>
