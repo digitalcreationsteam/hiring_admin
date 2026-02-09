@@ -14,4 +14,8 @@ export const URL_PATH = {
 
   /* 🏆 RANKING */
   userScoreRanks: "/admin/user-score/ranks",
+
+   /* 📍 PROFILE DATA (ADD THESE) */
+  demographics: "/demographics",
+  educations: "/educations",
 };

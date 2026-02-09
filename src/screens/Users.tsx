@@ -94,12 +94,63 @@ function StatusBadge({ status }: { status?: string }) {
   );
 }
 
+function formatLastLogin(lastLogin?: string) {
+  if (!lastLogin) return { label: "Never", sub: null };
+
+  const loginDate = new Date(lastLogin);
+  const today = new Date();
+
+  const diffDays = Math.floor(
+    (today.setHours(0, 0, 0, 0) - new Date(loginDate).setHours(0, 0, 0, 0)) /
+      (1000 * 60 * 60 * 24),
+  );
+
+  if (diffDays === 0) {
+    return {
+      label: "Today",
+      sub: loginDate.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+  }
+
+  if (diffDays === 1) {
+    return { label: "Yesterday", sub: null };
+  }
+
+  return {
+    label: loginDate.toLocaleDateString(),
+    sub: null,
+  };
+}
+
+function getUserStatus(lastLogin?: string): "active" | "inactive" {
+  if (!lastLogin) return "inactive";
+
+  const diffDays = Math.floor(
+    (Date.now() - new Date(lastLogin).getTime()) / (1000 * 60 * 60 * 24),
+  );
+
+  return diffDays >= 7 ? "inactive" : "active";
+
+}
+
+
+
 export default function Users() {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("all");
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
+
+
+
+  const [demographics, setDemographics] = useState<any[]>([]);
+const [educations, setEducations] = useState<any[]>([]);
+
+
 
   const [countryFilter, setCountryFilter] = useState("all");
   const [cityFilter, setCityFilter] = useState("all");
@@ -129,6 +180,30 @@ export default function Users() {
     ),
   );
 
+  const dailyActiveUsers = useMemo(() => {
+    const today = new Date().setHours(0, 0, 0, 0);
+
+    return students.filter((u) => {
+      if (!u.lastLogin) return false;
+
+      return new Date(u.lastLogin).setHours(0, 0, 0, 0) === today;
+    }).length;
+  }, [students]);
+
+  const monthlyActiveUsers = useMemo(() => {
+    const now = Date.now();
+
+    return students.filter((u) => {
+      if (!u.lastLogin) return false;
+
+      const diffDays = Math.floor(
+        (now - new Date(u.lastLogin).getTime()) / (1000 * 60 * 60 * 24),
+      );
+
+      return diffDays <= 30;
+    }).length;
+  }, [students]);
+
   const filteredStudents = useMemo(() => {
     return students.filter((student) => {
       const matchesSearch =
@@ -137,7 +212,8 @@ export default function Users() {
         student.lastname?.toLowerCase().includes(search.toLowerCase()) ||
         student.email.toLowerCase().includes(search.toLowerCase());
 
-      const matchesFilter = filter === "all" || student.status === filter;
+      const matchesFilter =
+        filter === "all" || getUserStatus(student.lastLogin) === filter;
 
       const matchesCountry =
         countryFilter === "all" || student.location?.country === countryFilter;
@@ -150,25 +226,19 @@ export default function Users() {
         student.location?.university === universityFilter;
 
       return (
-  matchesSearch &&
-  matchesFilter &&
-  matchesCountry &&
-  matchesCity &&
-  matchesUniversity
-);
-
+        matchesSearch &&
+        matchesFilter &&
+        matchesCountry &&
+        matchesCity &&
+        matchesUniversity
+      );
     });
-  }, [
-  students,
-  search,
-  filter,
-  countryFilter,
-  cityFilter,
-  universityFilter
-]);
+  }, [students, search, filter, countryFilter, cityFilter, universityFilter]);
 
   useEffect(() => {
     fetchUsers();
+      fetchLocations();
+
   }, []);
 
   const fetchUsers = async () => {
@@ -182,6 +252,18 @@ export default function Users() {
       setLoading(false);
     }
   };
+
+  const fetchLocations = async () => {
+  try {
+    // const demoRes = await API("GET", URL_PATH.demographics);
+    // const eduRes = await API("GET", URL_PATH.educations);
+
+    // if (demoRes?.success) setDemographics(demoRes.data || []);
+    // if (eduRes?.success) setEducations(eduRes.data || []);
+  } catch (e) {
+    console.error("Location fetch error:", e);
+  }
+};
 
   const openStudent = async (u: UserRow) => {
     setOpen(true);
@@ -249,15 +331,91 @@ export default function Users() {
     >
       {/* Header */}
       <div className="p-6 border-b" style={{ borderColor: colors.border }}>
-       <div className="mt-4">
-  <div className="text-sm" style={{ color: colors.textSecondary }}>
-    Total Students
-  </div>
-  <div className="text-2xl font-semibold" style={{ color: colors.textPrimary }}>
-    {students.length}
-  </div>
-</div>
+        <div className="mt-4 max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Total Students */}
+          <div
+            className="p-5 rounded-2xl border shadow-sm"
+            style={{
+              background: colors.surface,
+              borderColor: colors.border,
+            }}
+          >
+            <div
+              className="text-xs mb-2"
+              style={{ color: colors.textSecondary }}
+            >
+              Total Students
+            </div>
+            <div
+              className="text-3xl font-bold"
+              style={{ color: colors.textPrimary }}
+            >
+              {students.length}
+            </div>
+            <div
+              className="text-xs mt-1"
+              style={{ color: colors.textTertiary }}
+            >
+              Registered users
+            </div>
+          </div>
 
+          {/* Daily Active */}
+          <div
+            className="p-5 rounded-2xl border shadow-sm"
+            style={{
+              background: `${colors.success}40`,
+              borderColor: colors.border,
+            }}
+          >
+            <div
+              className="text-xs mb-2"
+              style={{ color: colors.textSecondary }}
+            >
+              Daily Active Users
+            </div>
+            <div
+              className="text-3xl font-bold"
+              style={{ color: colors.success }}
+            >
+              {dailyActiveUsers}
+            </div>
+            <div
+              className="text-xs mt-1"
+              style={{ color: colors.textTertiary }}
+            >
+              Logged in today
+            </div>
+          </div>
+
+          {/* Monthly Active */}
+          <div
+            className="p-5 rounded-2xl border shadow-sm"
+            style={{
+              background: `${colors.primary}40`,
+              borderColor: colors.border,
+            }}
+          >
+            <div
+              className="text-xs mb-2"
+              style={{ color: colors.textSecondary }}
+            >
+              Monthly Active Users
+            </div>
+            <div
+              className="text-3xl font-bold"
+              style={{ color: colors.primary }}
+            >
+              {monthlyActiveUsers}
+            </div>
+            <div
+              className="text-xs mt-1"
+              style={{ color: colors.textTertiary }}
+            >
+              Last 30 days
+            </div>
+          </div>
+        </div>
 
         <div className="flex items-center justify-between">
           <div>
@@ -326,7 +484,6 @@ export default function Users() {
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
-                <option value="pending">Pending</option>
                 <option value="inactive">Inactive</option>
               </select>
               <FeatherChevronDown
@@ -334,80 +491,80 @@ export default function Users() {
                 style={{ color: colors.textTertiary }}
               />
             </div>
-          <div className="relative">
-  <select
-    value={countryFilter}
-    onChange={(e) => setCountryFilter(e.target.value)}
-    className="appearance-none pl-4 pr-10 py-2.5 rounded-full"
-    style={{
-      border: `1px solid ${colors.border}`,
-      background: colors.background,
-      color: colors.textPrimary,
-    }}
-  >
-    <option value="all">Country</option>
-    {countries.map((c) => (
-      <option key={c} value={c}>{c}</option>
-    ))}
-  </select>
+            <div className="relative">
+              <select
+                value={countryFilter}
+                onChange={(e) => setCountryFilter(e.target.value)}
+                className="appearance-none pl-4 pr-10 py-2.5 rounded-full"
+                style={{
+                  border: `1px solid ${colors.border}`,
+                  background: colors.background,
+                  color: colors.textPrimary,
+                }}
+              >
+                <option value="all">Country</option>
+                {countries.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
 
-  <FeatherChevronDown
-    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
-    style={{ color: colors.textTertiary }}
-  />
-</div>
+              <FeatherChevronDown
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                style={{ color: colors.textTertiary }}
+              />
+            </div>
 
+            <div className="relative">
+              <select
+                value={cityFilter}
+                onChange={(e) => setCityFilter(e.target.value)}
+                className="appearance-none pl-4 pr-10 py-2.5 rounded-full"
+                style={{
+                  border: `1px solid ${colors.border}`,
+                  background: colors.background,
+                  color: colors.textPrimary,
+                }}
+              >
+                <option value="all">City</option>
+                {cities.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
 
-<div className="relative">
-  <select
-    value={cityFilter}
-    onChange={(e) => setCityFilter(e.target.value)}
-    className="appearance-none pl-4 pr-10 py-2.5 rounded-full"
-    style={{
-      border: `1px solid ${colors.border}`,
-      background: colors.background,
-      color: colors.textPrimary,
-    }}
-  >
-    <option value="all">City</option>
-    {cities.map((c) => (
-      <option key={c} value={c}>{c}</option>
-    ))}
-  </select>
+              <FeatherChevronDown
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                style={{ color: colors.textTertiary }}
+              />
+            </div>
 
-  <FeatherChevronDown
-    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
-    style={{ color: colors.textTertiary }}
-  />
-</div>
+            <div className="relative">
+              <select
+                value={universityFilter}
+                onChange={(e) => setUniversityFilter(e.target.value)}
+                className="appearance-none pl-4 pr-10 py-2.5 rounded-full"
+                style={{
+                  border: `1px solid ${colors.border}`,
+                  background: colors.background,
+                  color: colors.textPrimary,
+                }}
+              >
+                <option value="all">University</option>
+                {universities.map((u) => (
+                  <option key={u} value={u}>
+                    {u}
+                  </option>
+                ))}
+              </select>
 
-
-
-<div className="relative">
-  <select
-    value={universityFilter}
-    onChange={(e) => setUniversityFilter(e.target.value)}
-    className="appearance-none pl-4 pr-10 py-2.5 rounded-full"
-    style={{
-      border: `1px solid ${colors.border}`,
-      background: colors.background,
-      color: colors.textPrimary,
-    }}
-  >
-    <option value="all">University</option>
-    {universities.map((u) => (
-      <option key={u} value={u}>{u}</option>
-    ))}
-  </select>
-
-  <FeatherChevronDown
-    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
-    style={{ color: colors.textTertiary }}
-  />
-</div>
-
-
-
+              <FeatherChevronDown
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                style={{ color: colors.textTertiary }}
+              />
+            </div>
           </div>
 
           {selectedRows.length > 0 && (
@@ -583,7 +740,7 @@ export default function Users() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <StatusBadge status={u.status} />
+                    <StatusBadge status={getUserStatus(u.lastLogin)} />
                   </td>
                   <td className="px-6 py-4">
                     <div style={{ color: colors.textPrimary }}>{u.email}</div>
@@ -603,12 +760,26 @@ export default function Users() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div style={{ color: colors.textPrimary }}>
-                      {u.lastLogin
-                        ? new Date(u.lastLogin).toLocaleDateString()
-                        : "Never"}
-                    </div>
+                    {(() => {
+                      const login = formatLastLogin(u.lastLogin);
+                      return (
+                        <>
+                          <div style={{ color: colors.textPrimary }}>
+                            {login.label}
+                          </div>
+                          {login.sub && (
+                            <div
+                              className="text-xs"
+                              style={{ color: colors.textTertiary }}
+                            >
+                              {login.sub}
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
                   </td>
+
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <button
@@ -781,7 +952,10 @@ export default function Users() {
                       {selectedUser?.email}
                     </div>
                     <div className="flex items-center gap-4 mt-2">
-                      <StatusBadge status={selectedUser?.status} />
+                      <StatusBadge
+                        status={getUserStatus(selectedUser?.lastLogin)}
+                      />
+
                       <div
                         className="text-sm"
                         style={{ color: colors.textTertiary }}
