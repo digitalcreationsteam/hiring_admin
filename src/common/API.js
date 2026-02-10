@@ -6,8 +6,8 @@ import axios from "axios";
 /* =========================================
    🌐 BASE URL
 ========================================= */
-// export const BASE_URL = "http://localhost:5000/api";
-export const BASE_URL = "http://localhost:5001/api";
+export const BASE_URL = "http://localhost:5000/api";
+// export const BASE_URL = "http://localhost:5001/api";
 // export const BASE_URL = "https://unitalent.cloud/api";
 
 
@@ -55,6 +55,11 @@ export const URL_PATH = {
   demographics:"/user/demographics",
   educations:"/user/education",
 
+  // Analytics
+  avgCaseStudyStartedPerUser: "admin/analytics/avg-case-studies-per-user",
+  avgCaseStudyStartedCompletedPerUser: "admin/analytics/avg-case-studies-completed-per-user",
+  caseStudyCompletionRate: "admin/analytics/case-completion-rate",
+  avgTimePerCase: "/admin/analytics/avg-time-per-case"
 
 };
 
