@@ -7,8 +7,8 @@ import axios from "axios";
    🌐 BASE URL
 ========================================= */
 // export const BASE_URL = "http://localhost:5000/api";
-export const BASE_URL = "http://localhost:5001/api";
-// export const BASE_URL = "https://unitalent.cloud/api";
+// export const BASE_URL = "http://localhost:5001/api";
+export const BASE_URL = "https://unitalent.cloud/api";
 
 
 const isDev = process.env.NODE_ENV === "development";
