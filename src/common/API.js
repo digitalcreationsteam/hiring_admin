@@ -6,8 +6,8 @@ import axios from "axios";
 /* =========================================
    🌐 BASE URL
 ========================================= */
-export const BASE_URL = "http://localhost:5000/api";
-// export const BASE_URL = "http://localhost:5001/api";
+// export const BASE_URL = "http://localhost:5000/api";
+export const BASE_URL = "http://localhost:5001/api";
 // export const BASE_URL = "https://unitalent.cloud/api";
 
 
@@ -50,6 +50,10 @@ export const URL_PATH = {
   adminForgotPassword: "/auth/forgot-password",
   adminVerifyResetCode: "/auth/verify-reset-code",
   adminResetPassword: "/auth/reset-password",
+
+
+  demographics:"/user/demographics",
+  educations:"/user/education",
 
 
 };

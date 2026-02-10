@@ -1,258 +1,487 @@
+// AdminPageLayout.tsx - Updated with your color palette
 "use client";
 
 import React, { useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   FeatherHome,
-  FeatherBriefcase,
+  FeatherFile,
   FeatherUsers,
-  FeatherHeadphones,
+  FeatherPieChart,
+  FeatherBriefcase,
   FeatherChevronRight,
   FeatherChevronDown,
   FeatherLogOut,
+  FeatherSearch,
+  FeatherBell,
+  FeatherSettings,
+  FeatherMenu,
+  FeatherX,
 } from "@subframe/core";
 import { colors } from "../../common/colors";
-import logo from "../../assets/logo.png";
-
-
-
 
 const base =
-  "flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition select-none";
-const inactive = "text-white/60 hover:text-white hover:bg-white/10";
-const active = "text-white bg-white/10";
+  "flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all";
+const inactive = `hover:bg-[${colors.background}] text-[${colors.textSecondary}] hover:text-[${colors.textPrimary}]`;
+const active = `bg-[${colors.primary}10] text-[${colors.primary}] font-medium border-l-4 border-[${colors.primary}]`;
 
-function Item({
-  to,
-  icon,
-  label,
-  collapsed,
-}: {
-  to: string;
-  icon: React.ReactNode;
-  label: string;
-  collapsed: boolean;
-}) {
+function Item({ to, icon, label, collapsed, badge }: any) {
   return (
     <NavLink
       to={to}
       title={collapsed ? label : undefined}
       className={({ isActive }) =>
-        `${base} ${isActive ? active : inactive} ${collapsed ? "justify-center px-0" : ""}`
+        `${base} ${isActive ? active : inactive} ${
+          collapsed ? "justify-center px-3" : ""
+        }`
       }
     >
-      <span className="w-5 h-5 flex items-center justify-center">{icon}</span>
-      {!collapsed && <span className="truncate">{label}</span>}
+      <span className="w-5 h-5 flex items-center justify-center relative">
+        {icon}
+        {badge && (
+          <span
+            className="absolute -top-1 -right-1 w-2 h-2 rounded-full"
+            style={{ background: colors.error }}
+          ></span>
+        )}
+      </span>
+      {!collapsed && (
+        <div className="flex-1 flex items-center justify-between">
+          <span>{label}</span>
+          {badge && (
+            <span
+              className="text-xs px-1.5 py-0.5 rounded-full"
+              style={{ background: `${colors.error}20`, color: colors.error }}
+            >
+              {badge}
+            </span>
+          )}
+        </div>
+      )}
     </NavLink>
   );
 }
 
-
 export default function AdminPageLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-
   const [collapsed, setCollapsed] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showNotifications, setShowNotifications] = useState(false);
 
-
-  const isJobsRoute = useMemo(
-    () => location.pathname.startsWith("/jobs"),
-    [location.pathname]
+  const isDocumentsRoute = useMemo(
+    () => location.pathname.startsWith("/admin/documents"),
+    [location.pathname],
   );
 
-  const [jobsOpen, setJobsOpen] = useState(isJobsRoute);
-  
+  const [documentsOpen, setDocumentsOpen] = useState(isDocumentsRoute);
+
+  const adminName = localStorage.getItem("adminName") || "Admin";
+  const adminInitials = adminName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   const logout = () => {
     localStorage.removeItem("adminToken");
-    navigate("/login", { replace: true });
+    localStorage.removeItem("adminName");
+    navigate("/admin/login", { replace: true });
   };
 
+  const notifications = [
+    { id: 1, text: "New student registration", time: "2 min ago" },
+    { id: 2, text: "Document requires approval", time: "1 hour ago" },
+    { id: 3, text: "System backup completed", time: "Yesterday" },
+  ];
+
   return (
-    <div className="flex h-screen w-full overflow-hidden">
-      {/* LEFT SIDEBAR */}
+    <div
+      className="flex min-h-screen w-full"
+      style={{ background: colors.background }}
+    >
+      {/* Sidebar Backdrop for Mobile */}
+      {!collapsed && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setCollapsed(true)}
+        />
+      )}
+
+      {/* Sidebar */}
       <aside
-className={`flex flex-col shrink-0 h-full py-5 border-r border-white/10 transition-all duration-300 ${
-  collapsed ? "w-[88px] px-3" : "w-[280px] px-4"
-}`}
+        className={`
+          fixed lg:relative h-screen z-50
+          flex flex-col transition-all duration-300
+          ${collapsed ? "-translate-x-full lg:translate-x-0 w-20" : "w-64"}
+        `}
         style={{
-          background:
-            "linear-gradient(180deg, #15172B 0%, #14162A 40%, #121328 100%)",
+          background: colors.surface,
+          borderRight: `1px solid ${colors.border}`,
         }}
       >
-       {/* Brand */}
-<div className="flex items-center gap-3 px-4 pb-6">
-  <img
-    src="/hiringLogo.png"
-    alt="UniTalent Logo"
-    className="w-42 h-12 object-contain rounded-xl bg-white p-1"
-  />
-
-  {!collapsed && (
-    <div className="leading-tight">
-      <div className="text-white font-semibold text-lg">UniTalent</div>
-      {/* <div className="text-xs text-white/50">Admin</div> */}
-    </div>
-  )}
-</div>
-
-
-
-        {/* MENU */}
-        <div className="flex flex-col gap-1">
-          <Item
-  to="/admin/dashboard"
-  icon={<FeatherHome className="w-5 h-5" />}
-  label="Dashboard"
-  collapsed={collapsed}
-/>
-
-<Item
-  to="/admin/users"
-  icon={<FeatherUsers className="w-5 h-5" />}
-  label="Users"
-  collapsed={collapsed}
-/>
-
-<Item
-  to="/admin/recruiters"
-  icon={<FeatherHeadphones className="w-5 h-5" />}
-  label="Recruiters"
-  collapsed={collapsed}
-/>
-
-
-          {/* Jobs dropdown like screenshot */}
-          <button
-  type="button"
-  onClick={() => setJobsOpen((v) => !v)}
-  title={collapsed ? "Documents" : undefined}
-  className={`${base} ${isJobsRoute ? active : inactive} ${
-    collapsed ? "justify-center px-0" : ""
-  }`}
->
-  <span className="w-5 h-5 flex items-center justify-center">
-    <FeatherBriefcase className="w-5 h-5" />
-  </span>
-
-  {!collapsed && (
-    <>
-      <span className="flex-1 text-left">Documents</span>
-      {jobsOpen ? (
-        <FeatherChevronDown className="w-4 h-4" />
-      ) : (
-        <FeatherChevronRight className="w-4 h-4" />
-      )}
-    </>
-  )}
-</button>
-
-{!collapsed && (
-          <div
-            className={`ml-4 pl-3 border-l border-white/10 overflow-hidden transition-all ${
-              jobsOpen ? "max-h-40" : "max-h-0"
-            }`}
-          >
-            <NavLink
-              to="/admin/documents/recruiters"
-              className={({ isActive }) =>
-                `${base} ${isActive ? active : inactive} py-2 text-[13px]`
-              }
+        {/* Brand */}
+        <div className="p-4 border-b" style={{ borderColor: colors.border }}>
+          <div className="flex items-center gap-3">
+            {/* <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: colors.primary }}>
+              <span className="text-white font-bold text-lg">U</span>
+            </div> */}
+            {!collapsed && (
+              <div className="flex-1">
+                <img
+                  className="h-12 w-full"
+                  src="/UniTalent.png"
+                  alt="Company logo"
+                />
+                {/* <div className="font-bold" style={{ color: colors.textPrimary }}>UniTalhfjhent</div>
+                <div className="text-xs" style={{ color: colors.textSecondary }}>Admin Panel</div> */}
+              </div>
+            )}
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="lg:hidden p-1.5 rounded-lg hover:bg-gray-100"
+              style={{ color: colors.textSecondary }}
             >
-              Recruiter Documents
-            </NavLink>
-            <NavLink
-              to="/admin/documents/students"
-              className={({ isActive }) =>
-                `${base} ${isActive ? active : inactive} py-2 text-[13px]`
-              }
-            >
-              User Documents
-            </NavLink>
+              <FeatherX className="w-5 h-5" />
+            </button>
           </div>
-          )}
-
-          
         </div>
 
-      {/* Bottom logout */}
-<div className="mt-auto pt-6">
-  <button
-    onClick={logout}
-    title={collapsed ? "Log out" : undefined}
-    className={`
-      ${base}
-      w-full
-      bg-red-50
-      text-red-600
-      hover:bg-red-100
-      hover:text-red-700
-      border border-red-100
-      ${collapsed ? "justify-center px-0" : ""}
-    `}
-  >
-    <span className="w-5 h-5 flex items-center justify-center">
-      <FeatherLogOut className="w-5 h-5" />
-    </span>
-    {!collapsed && "Log out"}
-  </button>
-</div>
+        {/* Navigation */}
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+          <Item
+            to="/admin/dashboard"
+            icon={<FeatherHome style={{ color: colors.textSecondary }} />}
+            label="Dashboard"
+            collapsed={collapsed}
+          />
 
+          <Item
+            to="/admin/users"
+            icon={<FeatherUsers style={{ color: colors.textSecondary }} />}
+            label="Students"
+            collapsed={collapsed}
+          />
 
+          <Item
+            to="/admin/analytics"
+            icon={<FeatherPieChart style={{ color: colors.textSecondary }} />}
+            label="Analytics"
+            collapsed={collapsed}
+          />
+
+          <Item
+            to="/admin/recruiters"
+            icon={<FeatherBriefcase style={{ color: colors.textSecondary }} />}
+            label="Recruiters"
+            collapsed={collapsed}
+          />
+
+          {/* Documents Dropdown */}
+          <div>
+            <button
+              onClick={() => setDocumentsOpen(!documentsOpen)}
+              className={`${base} w-full ${
+                isDocumentsRoute ? active : inactive
+              } ${collapsed ? "justify-center px-3" : ""}`}
+            >
+              <FeatherFile style={{ color: colors.textSecondary }} />
+              {!collapsed && (
+                <>
+                  <span className="flex-1 text-left">Documents</span>
+                  {documentsOpen ? (
+                    <FeatherChevronDown
+                      className="w-4 h-4"
+                      style={{ color: colors.textSecondary }}
+                    />
+                  ) : (
+                    <FeatherChevronRight
+                      className="w-4 h-4"
+                      style={{ color: colors.textSecondary }}
+                    />
+                  )}
+                </>
+              )}
+            </button>
+
+            {!collapsed && documentsOpen && (
+              <div className="ml-6 mt-1 space-y-1">
+                <NavLink
+                  to="/admin/documents/recruiters"
+                  className={({ isActive }) =>
+                    `block px-4 py-2 text-sm rounded-lg transition-colors ${
+                      isActive
+                        ? `bg-[${colors.primary}10] text-[${colors.primary}]`
+                        : `text-[${colors.textSecondary}] hover:bg-[${colors.background}]`
+                    }`
+                  }
+                >
+                  Recruiter Docs
+                </NavLink>
+                <NavLink
+                  to="/admin/documents/students"
+                  className={({ isActive }) =>
+                    `block px-4 py-2 text-sm rounded-lg transition-colors ${
+                      isActive
+                        ? `bg-[${colors.primary}10] text-[${colors.primary}]`
+                        : `text-[${colors.textSecondary}] hover:bg-[${colors.background}]`
+                    }`
+                  }
+                >
+                  User Docs
+                </NavLink>
+              </div>
+            )}
+          </div>
+        </nav>
+
+        {/* User Profile & Logout */}
+        <div className="p-4 border-t" style={{ borderColor: colors.border }}>
+          {!collapsed ? (
+            <div className="space-y-3">
+              <div
+                className="flex items-center gap-3 p-2 rounded-lg"
+                style={{ background: colors.background }}
+              >
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{ background: colors.textPrimary }}
+                >
+                  <span className="text-white font-semibold">
+                    {adminInitials}
+                  </span>
+                </div>
+                <div className="flex-1">
+                  <div
+                    className="font-medium"
+                    style={{ color: colors.textPrimary }}
+                  >
+                    {adminName}
+                  </div>
+                  <div
+                    className="text-xs"
+                    style={{ color: colors.textSecondary }}
+                  >
+                    Administrator
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={logout}
+                className="w-full flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors hover:bg-red-50"
+                style={{ color: colors.error }}
+              >
+                <FeatherLogOut className="w-5 h-5" />
+                <span>Log out</span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center space-y-3">
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ background: colors.textPrimary }}
+              >
+                <span className="text-white font-semibold text-sm">
+                  {adminInitials}
+                </span>
+              </div>
+              <button
+                onClick={logout}
+                className="p-2 rounded-lg hover:bg-red-50"
+                title="Log out"
+                style={{ color: colors.error }}
+              >
+                <FeatherLogOut className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+        </div>
       </aside>
 
-     {/* RIGHT CONTENT (Header + Pages) */}
-<main className="flex-1 min-w-0 overflow-y-auto bg-slate-100">
-  {/* TOP HEADER */}
-  <div className="sticky top-0 z-40 bg-white border-b border-slate-200">
-    <div className="h-16 px-6 flex items-center justify-between gap-4">
-      {/* Left: menu button + search */}
-      <div className="flex items-center gap-3 flex-1">
-        <button
-          type="button"
-          className="h-10 w-10 rounded-xl bg-blue-600 text-white flex items-center justify-center"
-onClick={() => setCollapsed((v) => !v)}
+      {/* Main Content */}
+      <main className="flex-1 min-w-0">
+        {/* Top Header */}
+        <header
+          className="sticky top-0 z-40 border-b"
+          style={{ background: colors.surface, borderColor: colors.border }}
         >
-          ☰
-        </button>
+          <div className="h-16 px-6 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setCollapsed(!collapsed)}
+                className="px-2 py-2 rounded-lg hover:bg-gray-100"
+                style={{ color: colors.textSecondary }}
+              >
+                <FeatherMenu className="w-5 h-5" />
+              </button>
 
-        <div className="flex items-center gap-2 flex-1 max-w-xl bg-slate-100 rounded-2xl px-4 h-10">
-          <span className="text-slate-500">🔍</span>
-          <input
-            placeholder="Search"
-            className="bg-transparent outline-none w-full text-sm text-slate-700 placeholder:text-slate-500"
-          />
-        </div>
-      </div>
+              {/* Search */}
+              <div className="relative rounded-full border border-gray-800 overflow-hidden">
+                <FeatherSearch
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5"
+                  style={{ color: colors.textTertiary }}
+                />
 
-      {/* Right: admin name + initials */}
-      <div className="flex items-center gap-3">
-        <div className="text-right leading-tight hidden sm:block">
-          <div className="text-sm font-semibold text-slate-900">
-            {localStorage.getItem("adminName") || "Admin"}
+                <input
+                  type="text"
+                  placeholder="Search users, documents, settings..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 rounded-full text-sm focus:outline-none"
+                  style={{
+                    background: colors.background,
+                    color: colors.textPrimary,
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Right Actions */}
+            <div className="flex items-center gap-4">
+              {/* Notifications */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="p-2 rounded-lg hover:bg-gray-100 relative"
+                  style={{ color: colors.textSecondary }}
+                >
+                  <FeatherBell className="w-5 h-5" />
+                  <span
+                    className="absolute top-1 right-1 w-2 h-2 rounded-full"
+                    style={{ background: colors.error }}
+                  ></span>
+                </button>
+
+                {showNotifications && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setShowNotifications(false)}
+                    />
+                    <div
+                      className="absolute right-0 mt-2 w-80 rounded-xl shadow-lg z-20"
+                      style={{
+                        background: colors.surface,
+                        border: `1px solid ${colors.border}`,
+                      }}
+                    >
+                      <div
+                        className="p-4 border-b"
+                        style={{ borderColor: colors.border }}
+                      >
+                        <div
+                          className="font-semibold"
+                          style={{ color: colors.textPrimary }}
+                        >
+                          Notifications
+                        </div>
+                        <div
+                          className="text-xs"
+                          style={{ color: colors.textSecondary }}
+                        >
+                          You have {notifications.length} unread
+                        </div>
+                      </div>
+                      <div className="max-h-96 overflow-y-auto">
+                        {notifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            className="p-4 border-b hover:bg-gray-50 cursor-pointer"
+                            style={{ borderColor: colors.border }}
+                          >
+                            <div
+                              className="font-medium"
+                              style={{ color: colors.textPrimary }}
+                            >
+                              {notification.text}
+                            </div>
+                            <div
+                              className="text-xs mt-1"
+                              style={{ color: colors.textSecondary }}
+                            >
+                              {notification.time}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div
+                        className="p-3 border-t"
+                        style={{ borderColor: colors.border }}
+                      >
+                        <button
+                          className="w-full text-center text-sm hover:text-blue-700"
+                          style={{ color: colors.primary }}
+                        >
+                          View all notifications
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Settings */}
+              <button
+                className="p-2 rounded-lg hover:bg-gray-100"
+                style={{ color: colors.textSecondary }}
+              >
+                <FeatherSettings className="w-5 h-5" />
+              </button>
+
+              {/* Divider */}
+              {/* Divider */}
+              <div
+                className="h-6 w-px"
+                style={{ background: colors.border }}
+              ></div>
+
+              {/* Logout button */}
+              <button
+                onClick={logout}
+                className="px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-red-50"
+                style={{ color: colors.error }}
+              >
+                Logout
+              </button>
+
+              {/* User Profile */}
+              {collapsed && (
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <div
+                      className="text-sm font-medium"
+                      style={{ color: colors.textPrimary }}
+                    >
+                      {adminName}
+                    </div>
+                    <div
+                      className="text-xs"
+                      style={{ color: colors.textSecondary }}
+                    >
+                      Admin
+                    </div>
+                  </div>
+
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center"
+                    style={{ background: colors.textPrimary }}
+                  >
+                    <span className="text-white text-sm font-semibold">
+                      {adminInitials}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="text-xs text-slate-500">Admin</div>
+        </header>
+
+        {/* Page Content */}
+        <div className="p-6">
+          <Outlet />
         </div>
-
-        <div className="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center font-semibold text-slate-700">
-          {(localStorage.getItem("adminName") || "Admin")
-            .split(" ")
-            .filter(Boolean)
-            .slice(0, 2)
-            .map((x) => x[0])
-            .join("")
-            .toUpperCase()}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  {/* PAGE CONTENT */}
-  <div className="p-6">
-    <Outlet />
-  </div>
-</main>
-
+      </main>
     </div>
   );
 }
