@@ -7,8 +7,8 @@ import axios from "axios";
    🌐 BASE URL
 ========================================= */
 // export const BASE_URL = "http://localhost:5000/api";
-// export const BASE_URL = "http://localhost:5001/api";
-export const BASE_URL = "https://unitalent.cloud/api";
+export const BASE_URL = "http://localhost:5001/api";
+// export const BASE_URL = "https://unitalent.cloud/api";
 
 
 const isDev = process.env.NODE_ENV === "development";
@@ -59,6 +59,10 @@ export const URL_PATH = {
   avgCaseStudyStartedCompletedPerUser: "admin/analytics/avg-case-studies-completed-per-user",
   caseStudyCompletionRate: "admin/analytics/case-completion-rate",
   avgTimePerCase: "/admin/analytics/avg-time-per-case"
+
+  /* ---------- RESULTS ---------- */
+  result: "/user/experience_index",
+
 
 };
 

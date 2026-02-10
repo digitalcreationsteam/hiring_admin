@@ -19,4 +19,7 @@ export const URL_PATH = {
   demographics: "/user/demographics",
 educations: "/user/education",
 
+/* ---------- RESULTS ---------- */
+  result: "/user/experience_index",
+
 };

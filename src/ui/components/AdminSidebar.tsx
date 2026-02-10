@@ -54,8 +54,7 @@ export default function AdminSidebar() {
 
   return (
     <aside
-className="flex flex-col w-[280px] h-screen sticky top-0 px-4 py-5 border-r border-white/10"
-      style={{
+ className="fixed left-0 top-0 w-[260px] h-screen flex flex-col px-4 py-5 border-r border-gray-200 overflow-y-auto"      style={{
         background:
           "linear-gradient(180deg, ${colors.sidebar} 0%, #2a2914 40%, #121328 100%)",
       }}

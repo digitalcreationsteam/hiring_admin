@@ -119,18 +119,18 @@ function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-neutral-50 px-4 sm:px-6">
-      <div className="w-full max-w-[870px] border border-neutral-border bg-white shadow-md rounded-xl overflow-hidden">
-        <div className="flex flex-col lg:flex-row w-full">
-          {/* LEFT PANEL */}
+    <div className="min-h-screen w-full h-700 flex items-center justify-center bg-neutral-50 px-4 sm:px-6">
+      <div className="w-full max-w-[520px] border border-neutral-border bg-white shadow-md rounded-xl overflow-hidden">
+<div className="flex justify-center w-full">
+          {/* LEFT PANEL
           <div className="w-full lg:w-[64%] bg-neutral-50 px-6 py-8 flex flex-col justify-between">
             <div className="flex flex-col gap-4">
               <img
                 className="h-8 w-fit"
-                src="/hiringLogo.png"
+                src="/uniTalent.png"
                 alt="Company logo"
               />{" "}
-              <h1 className="text-3xl leading-snug">Welcome back, Admin</h1>
+              <h1 className="text-3xl leading-snug">Welcome To UniTalent</h1>
             </div>
 
             <div className="flex flex-col gap-4">
@@ -157,21 +157,29 @@ function AdminLogin() {
           </div>
 
           {/* DIVIDER */}
-          <div className="hidden lg:block w-[1px] bg-gray-300" />
+          {/* <div className="hidden lg:block w-[1px] bg-gray-300" /> */} 
 
           {/* RIGHT PANEL */}
-          <div className="w-full lg:w-1/2 px-6 py-8 flex flex-col gap-4">
+           <div className="w-full max-w-[520px] bg-neutral-50 px-6 py-8 flex flex-col justify-between">
+            <div className="flex flex-col gap-4">
+              <img
+                className="h-14 w-fit"
+                src="/uniTalent.png"
+                alt="Company logo"
+              />{" "}
+              {/* <h1 className="text-3xl leading-snug">Welcome To UniTalent</h1> */}
+            </div>
             <div>
-              <h2 className="text-[22px]">Admin Sign In</h2>
-              <p className="text-xs text-gray-500">
+              <h2 className="mt-4 text-[22px]">Admin Sign In</h2>
+              {/* <p className="text-xs text-gray-500">
                 Access the admin dashboard
-              </p>
+              </p> */}
             </div>
 
             <div className="w-full h-[1px] bg-gray-300 my-4" />
 
             {/* OAuth */}
-            <div className="flex flex-col gap-2">
+            {/* <div className="flex flex-col gap-2">
               <OAuthSocialButton
                 className="w-full h-10 sm:h-9 border border-gray-400 rounded-full flex items-center justify-center gap-2 hover:bg-gray-100"
                 logo="https://res.cloudinary.com/subframe/image/upload/v1711417516/shared/z0i3zyjjqkobzuaecgno.svg"
@@ -180,9 +188,9 @@ function AdminLogin() {
               >
                 Log in with Google
               </OAuthSocialButton>
-            </div>
+            </div> */}
 
-            <Divider text="or continue with email" />
+            {/* <Divider text="or continue with email" /> */}
 
             {/* FORM */}
             <form
@@ -251,7 +259,7 @@ function AdminLogin() {
               </button>
             </form>
 
-            <Divider />
+            {/* <Divider />
 
             <div className="text-xs text-center">
               Don’t have an admin account?{" "}
@@ -261,7 +269,7 @@ function AdminLogin() {
               >
                 Create admin
               </Link>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

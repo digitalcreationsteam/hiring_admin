@@ -98,7 +98,7 @@ export default function AdminPageLayout() {
 
   return (
     <div
-      className="flex min-h-screen w-full"
+      className="flex h-screen w-full overflow-hidden"
       style={{ background: colors.background }}
     >
       {/* Sidebar Backdrop for Mobile */}
@@ -122,7 +122,10 @@ export default function AdminPageLayout() {
         }}
       >
         {/* Brand */}
-        <div className="p-4 border-b" style={{ borderColor: colors.border }}>
+<div
+  className="h-16 px-4 border-b flex items-center"
+  style={{ borderColor: colors.border }}
+>
           <div className="flex items-center gap-3">
             {/* <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: colors.primary }}>
               <span className="text-white font-bold text-lg">U</span>
@@ -130,7 +133,7 @@ export default function AdminPageLayout() {
             {!collapsed && (
               <div className="flex-1">
                 <img
-                  className="h-12 w-full"
+                  className="h-auto"
                   src="/UniTalent.png"
                   alt="Company logo"
                 />
@@ -300,7 +303,8 @@ export default function AdminPageLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 min-w-0">
+      <main className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
+
         {/* Top Header */}
         <header
           className="sticky top-0 z-40 border-b"
@@ -478,7 +482,7 @@ export default function AdminPageLayout() {
         </header>
 
         {/* Page Content */}
-        <div className="p-6">
+        <div className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </div>
       </main>
