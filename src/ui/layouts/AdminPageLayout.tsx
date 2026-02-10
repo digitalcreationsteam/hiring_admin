@@ -189,10 +189,10 @@ export default function AdminPageLayout() {
                 isDocumentsRoute ? active : inactive
               } ${collapsed ? "justify-center px-3" : ""}`}
             >
-              <FeatherFile style={{ color: colors.textSecondary }} />
+              {/* <FeatherFile style={{ color: colors.textSecondary }} /> */}
               {!collapsed && (
                 <>
-                  <span className="flex-1 text-left">Documents</span>
+                  {/* <span className="flex-1 text-left">Documents</span>
                   {documentsOpen ? (
                     <FeatherChevronDown
                       className="w-4 h-4"
@@ -203,7 +203,7 @@ export default function AdminPageLayout() {
                       className="w-4 h-4"
                       style={{ color: colors.textSecondary }}
                     />
-                  )}
+                  )} */}
                 </>
               )}
             </button>

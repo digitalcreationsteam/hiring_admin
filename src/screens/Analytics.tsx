@@ -219,7 +219,7 @@ useEffect(() => {
           className="text-sm mt-1"
           style={{ color: colors.textSecondary }}
         >
-          Funnel metrics, engagement data, and case study performance
+          Funnel metrics and Case study performance
         </p>
       </div>
 

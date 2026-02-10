@@ -60,10 +60,6 @@ export const URL_PATH = {
   caseStudyCompletionRate: "admin/analytics/case-completion-rate",
   avgTimePerCase: "/admin/analytics/avg-time-per-case"
 
-  /* ---------- RESULTS ---------- */
-  result: "/user/experience_index",
-
-
 };
 
 
