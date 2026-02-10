@@ -70,7 +70,7 @@ function EmailVerification() {
         const res = await API("GET", `${URL_PATH.verifyEmail}/${token}`);
         if (res.success) {
           setStatusMessage("Email verified. Redirecting...");
-          setTimeout(() => navigate("/talent-ranking"), 1500);
+          setTimeout(() => navigate("/admin/dashboard"), 1500);
         } else {
           setStatusMessage("Invalid or expired link.");
         }

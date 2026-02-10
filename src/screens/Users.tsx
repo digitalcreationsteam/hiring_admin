@@ -43,6 +43,12 @@ type ScoreRow = {
   experienceIndexScore?: number;
   skillIndexScore?: number;
   hireabilityIndex?: number;
+
+  baselineScore?: number;
+caseStudiesCompleted?: number;
+avgCaseStudyTime?: number;
+
+
   city?: string;
   state?: string;
   country?: string;
@@ -67,6 +73,24 @@ function Pill({ label, value }: { label: string; value: any }) {
     </div>
   );
 }
+
+function StatCard({ label, value }: { label: string; value: any }) {
+  return (
+    <div
+      className="p-5 rounded-xl"
+      style={{ background: `${colors.primary}10` }}
+    >
+      <div className="text-xs mb-2" style={{ color: colors.textSecondary }}>
+        {label}
+      </div>
+
+      <div className="text-3xl font-bold" style={{ color: colors.textPrimary }}>
+        {value ?? "-"}
+      </div>
+    </div>
+  );
+}
+
 
 function StatusBadge({ status }: { status?: string }) {
   const getStatusColor = () => {
@@ -94,10 +118,12 @@ function StatusBadge({ status }: { status?: string }) {
   );
 }
 
-function formatLastLogin(lastLogin?: string) {
-  if (!lastLogin) return { label: "Never", sub: null };
+function formatLastLogin(lastLogin?: string, createdAt?: string) {
+  const baseDate = lastLogin || createdAt;
 
-  const loginDate = new Date(lastLogin);
+  if (!baseDate) return { label: "Never", sub: null };
+
+  const loginDate = new Date(baseDate);
   const today = new Date();
 
   const diffDays = Math.floor(
@@ -125,38 +151,71 @@ function formatLastLogin(lastLogin?: string) {
   };
 }
 
-function getUserStatus(lastLogin?: string): "active" | "inactive" {
+function getUserStatus(
+  lastLogin?: string,
+  createdAt?: string,
+): "active" | "inactive" {
+  const now = Date.now();
+
+  if (!lastLogin && createdAt) {
+    const diffDays = Math.floor(
+      (now - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    return diffDays <= 7 ? "active" : "inactive";
+  }
+
   if (!lastLogin) return "inactive";
 
   const diffDays = Math.floor(
-    (Date.now() - new Date(lastLogin).getTime()) / (1000 * 60 * 60 * 24),
+    (now - new Date(lastLogin).getTime()) / (1000 * 60 * 60 * 24),
   );
 
-  return diffDays >= 7 ? "inactive" : "active";
-
+  return diffDays >= 30 ? "inactive" : "active";
 }
-
-
 
 export default function Users() {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("all");
+
+  const [payingUsers, setPayingUsers] = useState(0);
+
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
-
-
-  const [demographics, setDemographics] = useState<any[]>([]);
-const [educations, setEducations] = useState<any[]>([]);
-
-
+  const [activeTab, setActiveTab] = useState("scores");
+  
+   const [open, setOpen] = useState(false);
 
   const [countryFilter, setCountryFilter] = useState("all");
   const [cityFilter, setCityFilter] = useState("all");
   const [universityFilter, setUniversityFilter] = useState("all");
 
-  const [open, setOpen] = useState(false);
+  
+  useEffect(() => {
+    setCityFilter("all");
+    setUniversityFilter("all");
+  }, [countryFilter]);
+
+  useEffect(() => {
+    setUniversityFilter("all");
+  }, [cityFilter]);
+
+
+  useEffect(() => {
+  if (open) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "auto";
+  }
+
+  return () => {
+    document.body.style.overflow = "auto";
+  };
+}, [open]);
+
+ 
   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
   const [score, setScore] = useState<ScoreRow | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
@@ -166,27 +225,50 @@ const [educations, setEducations] = useState<any[]>([]);
     [users],
   );
 
-  const countries = Array.from(
-    new Set(users.map((u) => u.location?.country).filter(Boolean) as string[]),
-  );
+  const countries = useMemo(() => {
+    return Array.from(
+      new Set(
+        users.map((u) => u.location?.country).filter(Boolean) as string[],
+      ),
+    );
+  }, [users]);
 
-  const cities = Array.from(
-    new Set(users.map((u) => u.location?.city).filter(Boolean) as string[]),
-  );
+  const cities = useMemo(() => {
+    return Array.from(
+      new Set(
+        users
+          .filter(
+            (u) =>
+              countryFilter === "all" || u.location?.country === countryFilter,
+          )
+          .map((u) => u.location?.city)
+          .filter(Boolean) as string[],
+      ),
+    );
+  }, [users, countryFilter]);
 
-  const universities = Array.from(
-    new Set(
-      users.map((u) => u.location?.university).filter(Boolean) as string[],
-    ),
-  );
+  const universities = useMemo(() => {
+    return Array.from(
+      new Set(
+        users
+          .filter(
+            (u) =>
+              (countryFilter === "all" ||
+                u.location?.country === countryFilter) &&
+              (cityFilter === "all" || u.location?.city === cityFilter),
+          )
+          .map((u) => u.location?.university)
+          .filter(Boolean) as string[],
+      ),
+    );
+  }, [users, countryFilter, cityFilter]);
 
   const dailyActiveUsers = useMemo(() => {
     const today = new Date().setHours(0, 0, 0, 0);
 
     return students.filter((u) => {
-      if (!u.lastLogin) return false;
-
-      return new Date(u.lastLogin).setHours(0, 0, 0, 0) === today;
+      const activityDate = u.lastLogin || u.createdAt;
+      return new Date(activityDate).setHours(0, 0, 0, 0) === today;
     }).length;
   }, [students]);
 
@@ -194,15 +276,28 @@ const [educations, setEducations] = useState<any[]>([]);
     const now = Date.now();
 
     return students.filter((u) => {
-      if (!u.lastLogin) return false;
+      const activityDate = u.lastLogin || u.createdAt;
 
       const diffDays = Math.floor(
-        (now - new Date(u.lastLogin).getTime()) / (1000 * 60 * 60 * 24),
+        (now - new Date(activityDate).getTime()) / (1000 * 60 * 60 * 24),
       );
 
       return diffDays <= 30;
     }).length;
   }, [students]);
+
+  const newUsersToday = useMemo(() => {
+    const today = new Date();
+
+    return users.filter((u) => {
+      const d = new Date(u.createdAt);
+      return (
+        d.getDate() === today.getDate() &&
+        d.getMonth() === today.getMonth() &&
+        d.getFullYear() === today.getFullYear()
+      );
+    }).length;
+  }, [users]);
 
   const filteredStudents = useMemo(() => {
     return students.filter((student) => {
@@ -213,7 +308,8 @@ const [educations, setEducations] = useState<any[]>([]);
         student.email.toLowerCase().includes(search.toLowerCase());
 
       const matchesFilter =
-        filter === "all" || getUserStatus(student.lastLogin) === filter;
+        filter === "all" ||
+        getUserStatus(student.lastLogin, student.createdAt) === filter;
 
       const matchesCountry =
         countryFilter === "all" || student.location?.country === countryFilter;
@@ -237,8 +333,7 @@ const [educations, setEducations] = useState<any[]>([]);
 
   useEffect(() => {
     fetchUsers();
-      fetchLocations();
-
+    fetchPayingUsers();
   }, []);
 
   const fetchUsers = async () => {
@@ -253,17 +348,16 @@ const [educations, setEducations] = useState<any[]>([]);
     }
   };
 
-  const fetchLocations = async () => {
-  try {
-    // const demoRes = await API("GET", URL_PATH.demographics);
-    // const eduRes = await API("GET", URL_PATH.educations);
-
-    // if (demoRes?.success) setDemographics(demoRes.data || []);
-    // if (eduRes?.success) setEducations(eduRes.data || []);
-  } catch (e) {
-    console.error("Location fetch error:", e);
-  }
-};
+  const fetchPayingUsers = async () => {
+    try {
+      const res = await API("GET", "/admin/paid-users");
+      if (res?.success) {
+        setPayingUsers(res.payingUsers);
+      }
+    } catch (e) {
+      console.error("Paying users fetch error:", e);
+    }
+  };
 
   const openStudent = async (u: UserRow) => {
     setOpen(true);
@@ -331,7 +425,7 @@ const [educations, setEducations] = useState<any[]>([]);
     >
       {/* Header */}
       <div className="p-6 border-b" style={{ borderColor: colors.border }}>
-        <div className="mt-4 max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mt-4 max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Total Students */}
           <div
             className="p-5 rounded-2xl border shadow-sm"
@@ -415,6 +509,46 @@ const [educations, setEducations] = useState<any[]>([]);
               Last 30 days
             </div>
           </div>
+        </div>
+        {/* New Users Today */}
+        <div
+          className="p-5 mt-5 rounded-2xl border shadow-sm"
+          style={{
+            background: `${colors.warning}40`,
+            borderColor: colors.border,
+          }}
+        >
+          <div className="text-xs mb-2" style={{ color: colors.textSecondary }}>
+            New Users Today
+          </div>
+
+          <div className="text-3xl font-bold" style={{ color: colors.warning }}>
+            {newUsersToday}
+          </div>
+
+          {/* <div
+    className="text-xs mt-1"
+    style={{ color: colors.textTertiary }}
+  >
+    Signed up today
+  </div> */}
+        </div>
+
+        {/* Paying Users */}
+        <div
+          className="p-5 mt-5 rounded-2xl border shadow-sm"
+          style={{
+            background: `${colors.success}20`,
+            borderColor: colors.border,
+          }}
+        >
+          <div className="text-xs mb-2">Subscribers</div>
+
+          <div className="text-3xl font-bold">{payingUsers}</div>
+          {/* 
+  <div className="text-xs mt-1">
+    Successful subscriptions
+  </div> */}
         </div>
 
         <div className="flex items-center justify-between">
@@ -740,7 +874,9 @@ const [educations, setEducations] = useState<any[]>([]);
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <StatusBadge status={getUserStatus(u.lastLogin)} />
+                    <StatusBadge
+                      status={getUserStatus(u.lastLogin, u.createdAt)}
+                    />
                   </td>
                   <td className="px-6 py-4">
                     <div style={{ color: colors.textPrimary }}>{u.email}</div>
@@ -761,7 +897,7 @@ const [educations, setEducations] = useState<any[]>([]);
                   </td>
                   <td className="px-6 py-4">
                     {(() => {
-                      const login = formatLastLogin(u.lastLogin);
+                      const login = formatLastLogin(u.lastLogin, u.createdAt);
                       return (
                         <>
                           <div style={{ color: colors.textPrimary }}>
@@ -875,8 +1011,11 @@ const [educations, setEducations] = useState<any[]>([]);
       {open && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div
-            className="w-full max-w-4xl rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden"
-            style={{ background: colors.surface }}
+            className="w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+            style={{
+              background: colors.surface,
+              height: "700px",
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -923,7 +1062,7 @@ const [educations, setEducations] = useState<any[]>([]);
             </div>
 
             {/* Modal Content */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+            <div className="p-6 flex flex-col h-full">
               {/* Profile Overview */}
               <div
                 className="mb-6 p-4 rounded-xl"
@@ -953,7 +1092,10 @@ const [educations, setEducations] = useState<any[]>([]);
                     </div>
                     <div className="flex items-center gap-4 mt-2">
                       <StatusBadge
-                        status={getUserStatus(selectedUser?.lastLogin)}
+                        status={getUserStatus(
+                          selectedUser?.lastLogin,
+                          selectedUser?.createdAt,
+                        )}
                       />
 
                       <div
@@ -977,210 +1119,261 @@ const [educations, setEducations] = useState<any[]>([]);
                 className="border-b mb-6"
                 style={{ borderColor: colors.border }}
               >
-                <div className="flex gap-6">
-                  <button
-                    className="pb-3 border-b-2 font-medium"
-                    style={{
-                      borderColor: colors.textPrimary,
-                      color: colors.textPrimary,
-                    }}
-                  >
-                    Scores & Ranks
-                  </button>
-                  <button
-                    className="pb-3 hover:text-gray-700"
-                    style={{ color: colors.textSecondary }}
-                  >
-                    Activity Log
-                  </button>
-                  <button
-                    className="pb-3 hover:text-gray-700"
-                    style={{ color: colors.textSecondary }}
-                  >
-                    Documents
-                  </button>
+                <div className="flex  gap-6">
+                  {[
+                    { key: "scores", label: "Scores & Ranks" },
+                    { key: "activity", label: "Activity Log" },
+                    { key: "documents", label: "Documents" },
+                    { key: "progress", label: "Progress" },
+                  ].map((tab) => (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveTab(tab.key)}
+                      className="pb-3 border-b-2 font-medium"
+                      style={{
+                        borderColor:
+                          activeTab === tab.key
+                            ? colors.textPrimary
+                            : "transparent",
+                        color:
+                          activeTab === tab.key
+                            ? colors.textPrimary
+                            : colors.textSecondary,
+                      }}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* Scores Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left Column */}
-                <div>
-                  <h3
-                    className="text-lg font-semibold mb-4"
-                    style={{ color: colors.textPrimary }}
-                  >
-                    Core Scores
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      {
-                        label: "Hireability Index",
-                        value: score?.hireabilityIndex,
-                        color: colors.success,
-                      },
-                      {
-                        label: "Experience Index",
-                        value: score?.experienceIndexScore,
-                        color: colors.success,
-                      },
-                      {
-                        label: "Skill Index",
-                        value: score?.skillIndexScore,
-                        color: colors.success,
-                      },
-                      {
-                        label: "Education Score",
-                        value: score?.educationScore,
-                        color: colors.success,
-                      },
-                    ].map((item, index) => (
-                      <div
-                        key={index}
-                        className="p-4 rounded-xl"
-                        style={{ background: `${item.color}10` }}
-                      >
-                        <div
-                          className="text-xs mb-1"
-                          style={{ color: item.color }}
-                        >
-                          {item.label}
-                        </div>
-                        <div
-                          className="text-2xl font-bold"
+              {activeTab === "scores" && (
+                <div className="flex-1 overflow-y-auto pb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Scores Grid */}
+                    <div className="flex-1 overflow-y-auto">
+                      {/* Left Column */}
+                      <div>
+                        <h3
+                          className="text-lg font-semibold mb-4"
                           style={{ color: colors.textPrimary }}
                         >
-                          {item.value ?? "-"}
+                          Core Scores
+                        </h3>
+                        <div className="grid grid-cols-2 gap-3">
+                          {[
+                            {
+                              label: "Hireability Index",
+                              value: score?.hireabilityIndex,
+                              color: colors.success,
+                            },
+                            {
+                              label: "Experience Index",
+                              value: score?.experienceIndexScore,
+                              color: colors.success,
+                            },
+                            {
+                              label: "Skill Index",
+                              value: score?.skillIndexScore,
+                              color: colors.success,
+                            },
+                            {
+                              label: "Education Score",
+                              value: score?.educationScore,
+                              color: colors.success,
+                            },
+                          ].map((item, index) => (
+                            <div
+                              key={index}
+                              className="p-4 rounded-xl"
+                              style={{ background: `${item.color}10` }}
+                            >
+                              <div
+                                className="text-xs mb-1"
+                                style={{ color: item.color }}
+                              >
+                                {item.label}
+                              </div>
+                              <div
+                                className="text-2xl font-bold"
+                                style={{ color: colors.textPrimary }}
+                              >
+                                {item.value ?? "-"}
+                              </div>
+                              <div
+                                className="text-xs mt-1"
+                                style={{ color: colors.textTertiary }}
+                              >
+                                {item.label.includes("Index")
+                                  ? "Overall Score"
+                                  : "Assessment"}
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                        <div
-                          className="text-xs mt-1"
-                          style={{ color: colors.textTertiary }}
-                        >
-                          {item.label.includes("Index")
-                            ? "Overall Score"
-                            : "Assessment"}
+
+                        <div className="mt-6">
+                          <h4
+                            className="text-sm font-medium mb-3"
+                            style={{ color: colors.textPrimary }}
+                          >
+                            Additional Scores
+                          </h4>
+
+                          <div className="space-y-2">
+                            <Pill label="Work Score" value={score?.workScore} />
+                            <Pill
+                              label="Award Score"
+                              value={score?.awardScore}
+                            />
+                            <Pill
+                              label="Certification Score"
+                              value={score?.certificationScore}
+                            />
+                            <Pill
+                              label="Project Score"
+                              value={score?.projectScore}
+                            />
+                          </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
 
-                  <div className="mt-6">
-                    <h4
-                      className="text-sm font-medium mb-3"
-                      style={{ color: colors.textPrimary }}
-                    >
-                      Additional Scores
-                    </h4>
-                    <div className="space-y-2">
-                      <Pill label="Work Score" value={score?.workScore} />
-                      <Pill label="Award Score" value={score?.awardScore} />
-                      <Pill
-                        label="Certification Score"
-                        value={score?.certificationScore}
-                      />
-                      <Pill label="Project Score" value={score?.projectScore} />
-                    </div>
-                  </div>
-                </div>
+                      {/* Right Column */}
+                      <div>
+                        <h3
+                          className="text-lg font-semibold mb-4"
+                          style={{ color: colors.textPrimary }}
+                        >
+                          Rankings
+                        </h3>
+                        <div className="grid grid-cols-2 gap-4">
+                          {[
+                            {
+                              label: "Global Rank",
+                              value: score?.globalRank,
+                              icon: (
+                                <FeatherStar
+                                  className="w-4 h-4"
+                                  style={{ color: colors.warning }}
+                                />
+                              ),
+                            },
+                            {
+                              label: "Country Rank",
+                              value: score?.countryRank,
+                              subtitle: score?.country,
+                            },
+                            {
+                              label: "State Rank",
+                              value: score?.stateRank,
+                              subtitle: score?.state,
+                            },
+                            {
+                              label: "City Rank",
+                              value: score?.cityRank,
+                              subtitle: score?.city,
+                            },
+                          ].map((item, index) => (
+                            <div
+                              key={index}
+                              className="border rounded-xl p-4"
+                              style={{ borderColor: colors.border }}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <div
+                                  className="text-xs"
+                                  style={{ color: colors.textSecondary }}
+                                >
+                                  {item.label}
+                                </div>
+                                {item.icon}
+                              </div>
+                              <div
+                                className="text-3xl font-bold"
+                                style={{ color: colors.textPrimary }}
+                              >
+                                #{item.value ?? "-"}
+                              </div>
+                              <div
+                                className="text-xs mt-1"
+                                style={{ color: colors.textTertiary }}
+                              >
+                                {item.subtitle || "Worldwide"}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
 
-                {/* Right Column */}
-                <div>
-                  <h3
-                    className="text-lg font-semibold mb-4"
-                    style={{ color: colors.textPrimary }}
-                  >
-                    Rankings
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    {[
-                      {
-                        label: "Global Rank",
-                        value: score?.globalRank,
-                        icon: (
-                          <FeatherStar
-                            className="w-4 h-4"
-                            style={{ color: colors.warning }}
-                          />
-                        ),
-                      },
-                      {
-                        label: "Country Rank",
-                        value: score?.countryRank,
-                        subtitle: score?.country,
-                      },
-                      {
-                        label: "State Rank",
-                        value: score?.stateRank,
-                        subtitle: score?.state,
-                      },
-                      {
-                        label: "City Rank",
-                        value: score?.cityRank,
-                        subtitle: score?.city,
-                      },
-                    ].map((item, index) => (
-                      <div
-                        key={index}
-                        className="border rounded-xl p-4"
-                        style={{ borderColor: colors.border }}
-                      >
-                        <div className="flex items-center justify-between mb-2">
+                        {/* Location */}
+                        <div
+                          className="mb-6 p-4 rounded-xl"
+                          style={{ background: colors.background }}
+                        >
+                          <h3
+                            className="text-sm font-semibold mb-2"
+                            style={{ color: colors.textPrimary }}
+                          >
+                            Location
+                          </h3>
+
                           <div
-                            className="text-xs"
+                            className="text-sm"
                             style={{ color: colors.textSecondary }}
                           >
-                            {item.label}
+                            {[
+                              selectedUser?.location?.city,
+                              selectedUser?.location?.country,
+                            ]
+                              .filter(Boolean)
+                              .join(", ") || "Location not specified"}
                           </div>
-                          {item.icon}
-                        </div>
-                        <div
-                          className="text-3xl font-bold"
-                          style={{ color: colors.textPrimary }}
-                        >
-                          #{item.value ?? "-"}
-                        </div>
-                        <div
-                          className="text-xs mt-1"
-                          style={{ color: colors.textTertiary }}
-                        >
-                          {item.subtitle || "Worldwide"}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
 
-                  <div className="mt-6">
-                    <h4
-                      className="text-sm font-medium mb-3"
-                      style={{ color: colors.textPrimary }}
-                    >
-                      Location
-                    </h4>
-                    <div
-                      className="p-4 rounded-xl"
-                      style={{ background: colors.background }}
-                    >
-                      <div
-                        className="text-sm"
-                        style={{ color: colors.textPrimary }}
-                      >
-                        {[score?.city, score?.state, score?.country]
-                          .filter(Boolean)
-                          .join(", ") || "Location not specified"}
-                      </div>
-                      <div
-                        className="text-xs mt-2"
-                        style={{ color: colors.textTertiary }}
-                      >
-                        Last updated:{" "}
-                        {score?.updatedAt
-                          ? new Date(score.updatedAt).toLocaleDateString()
-                          : "-"}
+                          <div
+                            className="text-xs mt-1"
+                            style={{ color: colors.textTertiary }}
+                          >
+                            {selectedUser?.location?.university ||
+                              "University not specified"}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {activeTab === "progress" && (
+  <div className="flex-1 overflow-y-auto pb-6">
+    <div className="grid grid-cols-2 gap-4">
+
+      <StatCard
+        label="Current Score"
+        value={score?.hireabilityIndex}
+      />
+
+      <StatCard
+        label="Initial Baseline Score"
+        value={score?.baselineScore}
+      />
+
+      <StatCard
+        label="Case Studies Completed"
+        value={score?.caseStudiesCompleted}
+      />
+
+      <StatCard
+        label="Avg Time per Case Study"
+        value={
+          score?.avgCaseStudyTime
+            ? `${score.avgCaseStudyTime} min`
+            : "-"
+        }
+      />
+
+    </div>
+  </div>
+)}
+
 
               {/* Loading State */}
               {detailsLoading && (
