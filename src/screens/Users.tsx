@@ -12,6 +12,7 @@ import {
   FeatherSearch,
   FeatherChevronDown,
   FeatherStar,
+  FeatherMoreVertical,
 } from "@subframe/core";
 import { colors } from "../common/colors";
 
@@ -177,8 +178,16 @@ function getUserStatus(
 export default function Users() {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [page, setPage] = useState(1);
+const limit = 5;
+
+
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("all");
+
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
 
   const [payingUsers, setPayingUsers] = useState(0);
 
@@ -191,6 +200,17 @@ export default function Users() {
   const [countryFilter, setCountryFilter] = useState("all");
   const [cityFilter, setCityFilter] = useState("all");
   const [universityFilter, setUniversityFilter] = useState("all");
+
+
+  const handleBlockUser = (id: string) => {
+  console.log("Block user:", id);
+  setOpenMenuId(null);
+};
+
+const handleDeleteUser = (id: string) => {
+  console.log("Delete user:", id);
+  setOpenMenuId(null);
+};
 
   
   useEffect(() => {
@@ -214,6 +234,21 @@ export default function Users() {
     document.body.style.overflow = "auto";
   };
 }, [open]);
+
+useEffect(() => {
+  const handleClickOutside = () => {
+    setOpenMenuId(null);
+  };
+
+  if (openMenuId) {
+    document.addEventListener("mousedown", handleClickOutside);
+  }
+
+  return () => {
+    document.removeEventListener("click", handleClickOutside);
+  };
+}, [openMenuId]);
+
 
  
   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
@@ -330,6 +365,18 @@ export default function Users() {
       );
     });
   }, [students, search, filter, countryFilter, cityFilter, universityFilter]);
+
+
+  useEffect(() => {
+  setPage(1);
+}, [search, filter, countryFilter, cityFilter, universityFilter]);
+
+  const paginatedStudents = useMemo(() => {
+  const start = (page - 1) * limit;
+  return filteredStudents.slice(start, start + limit);
+}, [filteredStudents, page]);
+
+const totalPages = Math.ceil(filteredStudents.length / limit) || 1;
 
   useEffect(() => {
     fetchUsers();
@@ -825,7 +872,7 @@ export default function Users() {
                 </td>
               </tr>
             ) : (
-              filteredStudents.map((u) => (
+              paginatedStudents.map((u) => (
                 <tr
                   key={u._id}
                   className="hover:bg-gray-50 cursor-pointer transition-colors"
@@ -916,37 +963,51 @@ export default function Users() {
                     })()}
                   </td>
 
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openStudent(u);
-                        }}
-                        className="p-1.5 rounded hover:bg-blue-50"
-                        title="View Details"
-                        style={{ color: colors.primary }}
-                      >
-                        <FeatherEye className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={(e) => e.stopPropagation()}
-                        className="p-1.5 rounded hover:bg-gray-100"
-                        title="Edit"
-                        style={{ color: colors.textSecondary }}
-                      >
-                        <FeatherEdit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={(e) => e.stopPropagation()}
-                        className="p-1.5 rounded hover:bg-red-50"
-                        title="Delete"
-                        style={{ color: colors.error }}
-                      >
-                        <FeatherTrash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
+                  <td
+  className="px-6 py-4 relative"
+  onClick={(e) => e.stopPropagation()}
+>
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      setOpenMenuId(openMenuId === u._id ? null : u._id);
+    }}
+    className="p-1.5 rounded hover:bg-gray-100"
+  >
+    <FeatherMoreVertical className="w-4 h-4" />
+  </button>
+
+  {openMenuId === u._id && (
+    <div
+className={`absolute right-6 w-40 rounded-lg shadow-lg border z-10 ${
+    paginatedStudents.indexOf(u) >= paginatedStudents.length - 2
+      ? "bottom-10"
+      : "mt-2"
+  }`}      style={{
+        background: colors.surface,
+        borderColor: colors.border,
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+        onClick={() => handleBlockUser(u._id)}
+        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+      >
+        Block
+      </button>
+
+      <button
+        onClick={() => handleDeleteUser(u._id)}
+        className="block w-full text-left px-4 py-2 text-sm hover:bg-red-50"
+        style={{ color: colors.error }}
+      >
+        Delete
+      </button>
+    </div>
+  )}
+</td>
+
+
                 </tr>
               ))
             )}
@@ -954,58 +1015,73 @@ export default function Users() {
         </table>
       </div>
 
-      {/* Footer */}
-      <div
-        className="px-6 py-4 border-t flex items-center justify-between"
-        style={{ borderColor: colors.border }}
+    {/* Footer */}
+<div
+  className="px-6 py-4 border-t flex items-center justify-between"
+  style={{ borderColor: colors.border }}
+>
+  {/* LEFT SIDE — SAME AS BEFORE */}
+  <div className="text-sm" style={{ color: colors.textSecondary }}>
+    Showing{" "}
+    <span className="font-medium" style={{ color: colors.textPrimary }}>
+      {paginatedStudents.length}
+    </span>{" "}
+    of{" "}
+    <span className="font-medium" style={{ color: colors.textPrimary }}>
+      {filteredStudents.length}
+    </span>{" "}
+    students
+  </div>
+
+  {/* RIGHT SIDE — PAGINATION */}
+  <div className="flex items-center gap-2">
+    {/* Previous */}
+    <button
+      disabled={page === 1}
+      onClick={() => setPage((p) => p - 1)}
+      className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-50"
+      style={{
+        border: `1px solid ${colors.border}`,
+        color: colors.textSecondary,
+        opacity: page === 1 ? 0.5 : 1,
+      }}
+    >
+      Previous
+    </button>
+
+    {/* Page numbers */}
+    {Array.from({ length: totalPages || 1 }, (_, i) => i + 1).map((num) => (
+      <button
+        key={num}
+        onClick={() => setPage(num)}
+        className="px-3 py-1.5 text-sm rounded-lg"
+        style={{
+          background: page === num ? colors.primary : "transparent",
+          color: page === num ? colors.textPrimary : colors.textSecondary,
+          border: `1px solid ${colors.border}`,
+        }}
       >
-        <div className="text-sm" style={{ color: colors.textSecondary }}>
-          Showing{" "}
-          <span className="font-medium" style={{ color: colors.textPrimary }}>
-            {filteredStudents.length}
-          </span>{" "}
-          of{" "}
-          <span className="font-medium" style={{ color: colors.textPrimary }}>
-            {students.length}
-          </span>{" "}
-          students
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-50"
-            style={{
-              border: `1px solid ${colors.border}`,
-              color: colors.textSecondary,
-            }}
-          >
-            Previous
-          </button>
-          <button
-            className="px-3 py-1.5 text-sm rounded-lg"
-            style={{ background: colors.primary, color: colors.textPrimary }}
-          >
-            1
-          </button>
-          <button
-            className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-50"
-            style={{
-              border: `1px solid ${colors.border}`,
-              color: colors.textSecondary,
-            }}
-          >
-            2
-          </button>
-          <button
-            className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-50"
-            style={{
-              border: `1px solid ${colors.border}`,
-              color: colors.textSecondary,
-            }}
-          >
-            Next
-          </button>
-        </div>
-      </div>
+        {num}
+      </button>
+    ))}
+
+    {/* Next */}
+    <button
+      disabled={page === totalPages || totalPages === 0}
+      onClick={() => setPage((p) => p + 1)}
+      className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-50"
+      style={{
+        border: `1px solid ${colors.border}`,
+        color: colors.textSecondary,
+        opacity: page === totalPages ? 0.5 : 1,
+      }}
+    >
+      Next
+    </button>
+  </div>
+</div>
+
+
 
       {/* DETAILS MODAL */}
       {open && (
@@ -1080,6 +1156,7 @@ export default function Users() {
                         ""}
                     </span>
                   </div>
+                  
                   <div>
                     <div
                       className="font-bold"
@@ -1098,6 +1175,7 @@ export default function Users() {
                         )}
                       />
 
+
                       <div
                         className="text-sm"
                         style={{ color: colors.textTertiary }}
@@ -1109,6 +1187,7 @@ export default function Users() {
                             ).toLocaleDateString()
                           : ""}
                       </div>
+                      
                     </div>
                   </div>
                 </div>
@@ -1121,10 +1200,11 @@ export default function Users() {
               >
                 <div className="flex  gap-6">
                   {[
-                    { key: "scores", label: "Scores & Ranks" },
-                    { key: "activity", label: "Activity Log" },
-                    { key: "documents", label: "Documents" },
+                    { key: "scores", label: "Ranks" },
                     { key: "progress", label: "Progress" },
+                    // { key: "documents", label: "Documents" },
+                    // { key: "activity", label: "Activity Log" },
+                    
                   ].map((tab) => (
                     <button
                       key={tab.key}
@@ -1151,16 +1231,16 @@ export default function Users() {
                 <div className="flex-1 overflow-y-auto pb-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Scores Grid */}
-                    <div className="flex-1 overflow-y-auto">
+                    {/* <div className="flex-1 overflow-y-auto"> */}
                       {/* Left Column */}
-                      <div>
+                      {/* <div>
                         <h3
                           className="text-lg font-semibold mb-4"
                           style={{ color: colors.textPrimary }}
                         >
                           Core Scores
                         </h3>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 gap-5">
                           {[
                             {
                               label: "Hireability Index",
@@ -1177,11 +1257,11 @@ export default function Users() {
                               value: score?.skillIndexScore,
                               color: colors.success,
                             },
-                            {
-                              label: "Education Score",
-                              value: score?.educationScore,
-                              color: colors.success,
-                            },
+                            // {
+                            //   label: "Education Score",
+                            //   value: score?.educationScore,
+                            //   color: colors.success,
+                            // },
                           ].map((item, index) => (
                             <div
                               key={index}
@@ -1210,9 +1290,9 @@ export default function Users() {
                               </div>
                             </div>
                           ))}
-                        </div>
+                        </div> */}
 
-                        <div className="mt-6">
+                        {/* <div className="mt-6">
                           <h4
                             className="text-sm font-medium mb-3"
                             style={{ color: colors.textPrimary }}
@@ -1235,8 +1315,8 @@ export default function Users() {
                               value={score?.projectScore}
                             />
                           </div>
-                        </div>
-                      </div>
+                        </div> */}
+                      {/* </div> */}
 
                       {/* Right Column */}
                       <div>
@@ -1337,7 +1417,7 @@ export default function Users() {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    {/* </div> */}
                   </div>
                 </div>
               )}
