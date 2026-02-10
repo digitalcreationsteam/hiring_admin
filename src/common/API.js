@@ -54,6 +54,11 @@ export const URL_PATH = {
 
   paidUsers:"/admin/paid-users",
 
+  // Analytics
+  avgCaseStudyStartedPerUser: "admin/analytics/avg-case-studies-per-user",
+  avgCaseStudyStartedCompletedPerUser: "admin/analytics/avg-case-studies-completed-per-user",
+  caseStudyCompletionRate: "admin/analytics/case-completion-rate",
+  avgTimePerCase: "/admin/analytics/avg-time-per-case"
 
 };
 

@@ -1,12 +1,15 @@
-// src/screens/admin/Analytics.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
+import API, { URL_PATH } from "../common/API";
 import { colors } from "../common/colors";
 import {
   FeatherTrendingUp,
   FeatherUsers,
-  FeatherActivity,
   FeatherBarChart2,
 } from "@subframe/core";
+
+/* =======================
+   SMALL UI COMPONENTS
+======================= */
 
 function StatCard({
   title,
@@ -48,7 +51,7 @@ function FunnelStep({
   conversion,
 }: {
   label: string;
-  users: number;
+  users: number | string;
   conversion?: string;
 }) {
   return (
@@ -79,20 +82,148 @@ function FunnelStep({
   );
 }
 
+/* =======================
+   MAIN ANALYTICS PAGE
+======================= */
+
 export default function Analytics() {
+  const [loading, setLoading] = useState(true);
+
+  const [caseMetrics, setCaseMetrics] = useState({
+    avgStarted: "--",
+    avgCompleted: "--",
+    completionRate: "--",
+    avgTime: "--",
+  });
+
+  // useEffect(() => {
+  //   const fetchCaseStudyMetrics = async () => {
+  //     try {
+  //       const [
+  //         avgStartedRes,
+  //         avgCompletedRes,
+  //         completionRateRes,
+  //         avgTimeRes,
+  //       ] = await Promise.all([
+  //         API("get", URL_PATH.avgCaseStudyStartedPerUser),
+  //         API("get", URL_PATH.avgCaseStudyStartedCompletedPerUser),
+  //         API("get", URL_PATH.caseStudyCompletionRate),
+  //         API("get", URL_PATH.avgTimePerCase),
+  //       ]);
+
+  //       // ⏱ Convert seconds → mm ss
+  //       const totalSeconds = avgTimeRes.avgTimeSeconds || 0;
+  //       const minutes = Math.floor(totalSeconds / 60);
+  //       const seconds = totalSeconds % 60;
+
+  //       setCaseMetrics({
+  //         avgStarted: avgStartedRes.avg?.toFixed(2) ?? "0",
+  //         avgCompleted: avgCompletedRes.avg?.toFixed(2) ?? "0",
+  //         completionRate: `${completionRateRes.rate?.toFixed(1) ?? 0}%`,
+  //         avgTime: `${minutes}m ${seconds}s`,
+  //       });
+  //     } catch (error) {
+  //       console.error("❌ Failed to load analytics", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchCaseStudyMetrics();
+  // }, []);
+
+//   useEffect(() => {
+//   const fetchCaseStudyMetrics = async () => {
+//     try {
+//       const [
+//         avgStartedRes,
+//         avgCompletedRes,
+//         completionRateRes,
+//         avgTimeRes,
+//       ] = await Promise.all([
+//         API("get", URL_PATH.avgCaseStudyStartedPerUser),
+//         API("get", URL_PATH.avgCaseStudyStartedCompletedPerUser),
+//         API("get", URL_PATH.caseStudyCompletionRate),
+//         API("get", URL_PATH.avgTimePerCase),
+//       ]);
+
+//       setCaseMetrics({
+//         avgStarted: avgStartedRes.avgCaseStudiesPerUser?.toFixed(2),
+//         avgCompleted:
+//           avgCompletedRes.data.averageCompletedPerUser?.toFixed(2),
+//         completionRate:
+//           `${completionRateRes.data.completionRate?.toFixed(1)}%`,
+//         avgTime:  
+//       });
+//     } catch (err) {
+//       console.error("Analytics error", err);
+//     } finally {
+//       // 🔥 THIS IS WHAT WAS MISSING
+//       setLoading(false);
+//     }
+//   };
+
+//   fetchCaseStudyMetrics();
+// }, []);
+
+useEffect(() => {
+  const fetchCaseStudyMetrics = async () => {
+    try {
+      const [
+        avgStartedRes,
+        avgCompletedRes,
+        completionRateRes,
+        avgTimeRes,
+      ] = await Promise.all([
+        API("get", URL_PATH.avgCaseStudyStartedPerUser),
+        API("get", URL_PATH.avgCaseStudyStartedCompletedPerUser),
+        API("get", URL_PATH.caseStudyCompletionRate),
+        API("get", URL_PATH.avgTimePerCase),
+      ]);
+
+      const avgTimeMinutes =
+        avgTimeRes?.data?.[0]?.avgTimeMinutes ?? 0;
+
+      setCaseMetrics({
+        avgStarted: avgStartedRes.avgCaseStudiesPerUser?.toFixed(2) ?? "0",
+        avgCompleted:
+          avgCompletedRes.data.averageCompletedPerUser?.toFixed(2) ?? "0",
+        completionRate:
+          `${completionRateRes.data.completionRate?.toFixed(1)}%`,
+        avgTime: `${avgTimeMinutes.toFixed(2)} min`,
+      });
+    } catch (err) {
+      console.error("❌ Analytics load failed", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchCaseStudyMetrics();
+}, []);
+
+
+
+
   return (
     <div className="space-y-6">
       {/* PAGE TITLE */}
       <div>
-        <h1 className="text-xl font-semibold" style={{ color: colors.textPrimary }}>
+        <h1
+          className="text-xl font-semibold"
+          style={{ color: colors.textPrimary }}
+        >
           Analytics
         </h1>
-        <p className="text-sm mt-1" style={{ color: colors.textSecondary }}>
+        <p
+          className="text-sm mt-1"
+          style={{ color: colors.textSecondary }}
+        >
           Funnel metrics, engagement data, and case study performance
         </p>
       </div>
 
-      {/* FUNNEL METRICS */}
+      {/* FUNNEL METRICS (STATIC / PLACEHOLDER FOR NOW) */}
       <div
         className="rounded-xl p-5"
         style={{
@@ -133,15 +264,27 @@ export default function Analytics() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <StatCard title="Avg Started / User" value="2.4" />
-          <StatCard title="Avg Completed / User" value="1.7" />
-          <StatCard title="Completion Rate" value="71%" />
-          <StatCard title="Avg Time / Case Study" value="12m 20s" />
+          <StatCard
+            title="Avg Started / User"
+            value={loading ? "..." : caseMetrics.avgStarted}
+          />
+          <StatCard
+            title="Avg Completed / User"
+            value={loading ? "..." : caseMetrics.avgCompleted}
+          />
+          <StatCard
+            title="Completion Rate"
+            value={loading ? "..." : caseMetrics.completionRate}
+          />
+          <StatCard
+            title="Avg Time / Case Study"
+            value={loading ? "..." : caseMetrics.avgTime}
+          />
         </div>
       </div>
 
       {/* ENGAGEMENT METRICS */}
-      <div
+      {/* <div
         className="rounded-xl p-5"
         style={{
           background: colors.surface,
@@ -156,13 +299,15 @@ export default function Analytics() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <StatCard title="Total Users" value="5,421" />
-          <StatCard title="Paying Users" value="1,204" />
-          <StatCard title="Daily Active Users" value="324" />
-          <StatCard title="Monthly Active Users" value="2,842" />
-          <StatCard title="New Users Today" value="47" />
+          <StatCard title="Total Users" value="—" />
+          <StatCard title="Paying Users" value="—" />
+          <StatCard title="Daily Active Users" value="—" />
+          <StatCard title="Monthly Active Users" value="—" />
+          <StatCard title="New Users Today" value="—" />
         </div>
-      </div>
-    </div>
-  );
+      </div> */}
+     </div>  
+    
+  )
 }
+
