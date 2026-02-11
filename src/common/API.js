@@ -6,9 +6,9 @@ import axios from "axios";
 /* =========================================
    🌐 BASE URL
 ========================================= */
-// export const BASE_URL = "http://localhost:5000/api";
+export const BASE_URL = "http://localhost:5000/api";
 // export const BASE_URL = "http://localhost:5001/api";
-export const BASE_URL = "https://unitalent.cloud/api";
+// export const BASE_URL = "https://unitalent.cloud/api";
 
 
 const isDev = process.env.NODE_ENV === "development";
@@ -58,12 +58,16 @@ export const URL_PATH = {
   avgCaseStudyStartedPerUser: "admin/analytics/avg-case-studies-per-user",
   avgCaseStudyStartedCompletedPerUser: "admin/analytics/avg-case-studies-completed-per-user",
   caseStudyCompletionRate: "admin/analytics/case-completion-rate",
-  avgTimePerCase: "/admin/analytics/avg-time-per-case"
+  avgTimePerCase: "/admin/analytics/avg-time-per-case",
+  funnelMetrics: "/admin/analytics/conversion-funnel",
 
-};
-
-
-
+  // engagement Metrics
+  totalUser: "/admin/users",
+  payingUser: "/admin/analytics/total-paying-users",
+  dailyActiveUser: "/admin/analytics/daily-active-users",
+  monthlyActiveUser: "/admin/analytics/monthly-active-users",
+  newUser: "/admin/analytics/new-users-today"
+}
 /* =========================================
    🚀 API WRAPPER FUNCTION
 ========================================= */
