@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import API, { URL_PATH } from "../common/API";
+import { colors } from "common/colors";
 
 export default function VerifyResetCode() {
   const navigate = useNavigate();
@@ -192,6 +193,7 @@ const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
           </div>
 
         <button
+  style={{backgroundColor:colors.primary}}
   onClick={handleVerify}
   disabled={loading}
   className={`w-full h-10 rounded-3xl font-semibold transition
@@ -209,12 +211,13 @@ const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
           <p className="text-center text-sm text-gray-500 mt-4">
             Haven’t got the email?{" "}
             <span
+            style={{color:colors.primary}}
   onClick={handleResend}
   className={`font-medium transition
     ${
       resendLoading || cooldown > 0
-        ? "text-gray-400 cursor-not-allowed"
-        : "text-violet-600 cursor-pointer hover:underline"
+        ? `text-gray-400 cursor-not-allowed`
+        : "cursor-pointer hover:underline"
     }`}
 >
   {resendLoading

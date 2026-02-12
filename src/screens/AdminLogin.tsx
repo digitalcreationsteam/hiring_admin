@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FeatherShield, FeatherUsers, FeatherSettings } from "@subframe/core";
 import { OAuthSocialButton } from "../ui";
 import API, { URL_PATH, BASE_URL } from "../common/API";
+import { colors } from "common/colors";
 // import { useAppDispatch } from "src/store/hooks";
 // import { setToken } from "src/store/slices/authSlice";
 // import { setUserProfile } from "src/store/slices/userSlice";
@@ -120,7 +121,8 @@ function AdminLogin() {
 
   return (
     <div className="min-h-screen w-full h-700 flex items-center justify-center bg-neutral-50 px-4 sm:px-6">
-      <div className="w-full max-w-[520px] border border-neutral-border bg-white shadow-md rounded-xl overflow-hidden">
+      <div 
+      className="w-full max-w-[520px] border bg-white shadow-md rounded-xl overflow-hidden">
 <div className="flex justify-center w-full">
           {/* LEFT PANEL
           <div className="w-full lg:w-[64%] bg-neutral-50 px-6 py-8 flex flex-col justify-between">
@@ -161,20 +163,21 @@ function AdminLogin() {
 
           {/* RIGHT PANEL */}
            <div className="w-full max-w-[520px] bg-neutral-50 px-6 py-8 flex flex-col justify-between">
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 w-fit items-center justify-center mx-auto">
               <img
-                className="h-14 w-fit"
-                src="/uniTalent.png"
+                className="h-14 w-48 object-contain"
+                src="/UniTalent.png"
                 alt="Company logo"
               />{" "}
               {/* <h1 className="text-3xl leading-snug">Welcome To UniTalent</h1> */}
             </div>
+           {/*
             <div>
               <h2 className="mt-4 text-[22px]">Admin Sign In</h2>
-              {/* <p className="text-xs text-gray-500">
+               <p className="text-xs text-gray-500">
                 Access the admin dashboard
-              </p> */}
-            </div>
+              </p> 
+            </div>*/}
 
             <div className="w-full h-[1px] bg-gray-300 my-4" />
 
@@ -232,7 +235,7 @@ function AdminLogin() {
                 <div />
                 <Link
                   to="/forgot-password"
-                  className="text-xs text-violet-600 hover:underline"
+                  className="text-xs hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -247,6 +250,8 @@ function AdminLogin() {
               </div>
 
               <button
+                style={{backgroundColor: colors.primary,
+                        color: colors.white}}
                 type="submit"
                 disabled={loading}
                 className={`w-full h-9 text-white font-semibold rounded-full transition ${

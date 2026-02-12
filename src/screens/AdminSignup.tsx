@@ -10,6 +10,7 @@ import {
 } from "@subframe/core";
 import { OAuthSocialButton } from "../ui";
 import API, { URL_PATH, BASE_URL } from "../common/API";
+import { colors } from "../common/colors";
 
 
 function AdminSignup() {
@@ -159,7 +160,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
           {/* LEFT PANEL */}
           <div className="w-full lg:w-[64%] bg-neutral-50 px-6 py-8 flex flex-col justify-between">
             <div className="flex flex-col gap-4">
-              <img className="h-8 w-fit" src="/hiringLogo.png" alt="logo" />
+              <img className="h-8 w-48 object-contain" src="/UniTalent.png" alt="logo" />
               <h1 className="text-3xl leading-snug">
                 Create your admin workspace
               </h1>
@@ -169,19 +170,19 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
               <Divider />
 
               <Feature
-                icon={<FeatherShield className="text-violet-600" />}
+                icon={<FeatherShield className={`${colors.primary}`} />}
                 title="Restricted access"
                 desc="Only authorized admins can manage the platform"
               />
 
               <Feature
-                icon={<FeatherUsers className="text-violet-600" />}
+                icon={<FeatherUsers className={`${colors.primary}`} />}
                 title="Full user control"
                 desc="Manage candidates, recruiters, and permissions"
               />
 
               <Feature
-                icon={<FeatherSettings className="text-violet-600" />}
+                icon={<FeatherSettings className={`${colors.primary}`} />}
                 title="Platform configuration"
                 desc="Control assessments, hiring flow, and payments"
               />
@@ -279,12 +280,13 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
               {/* Submit */}
               <button
+                style={{backgroundColor: colors.primary, color: colors.white}}
                 type="submit"
                 disabled={loading}
                 className={`w-full h-9 text-white font-semibold rounded-full ${
                   loading
-                    ? "bg-violet-900 cursor-wait"
-                    : "bg-violet-700 hover:bg-violet-800"
+                    ? `${colors.primary} cursor-wait`
+                    : `${colors.primary} cursor-pointer` 
                 }`}
               >
                 {loading ? "Creating..." : "Create account"}
@@ -297,7 +299,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
               Already have an admin account?{" "}
               <Link
                 to="/admin/login"
-                className="text-violet-600 font-semibold hover:underline"
+                className={`font-semibold hover:underline text-${colors.primary}`}
               >
                 Sign in
               </Link>

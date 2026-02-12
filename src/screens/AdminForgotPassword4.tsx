@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { colors } from "common/colors";
+import { hover } from "@testing-library/user-event/dist/hover";
 
 export default function ResetPasswordSuccess() {
   const navigate = useNavigate();
@@ -46,7 +48,8 @@ export default function ResetPasswordSuccess() {
         {/* Button (simple, consistent with your preference) */}
         <button
           onClick={() => navigate("/login", { replace: true })}
-          className="w-full h-10 bg-violet-600 text-white rounded-3xl font-semibold hover:bg-violet-700 transition"
+          className={`w-full h-10 text-white rounded-3xl font-semibold  transition hover:bg-${colors.secondary}`}
+          style={{backgroundColor: colors.primary}}
         >
           Log In
         </button>

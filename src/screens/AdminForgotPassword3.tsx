@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import API, { URL_PATH } from "../common/API";
+import { colors } from "../common/colors";
 
 export default function SetNewPassword() {
   const navigate = useNavigate();
@@ -108,6 +109,7 @@ export default function SetNewPassword() {
           />
 
           <button
+            style={{backgroundColor: colors.primary, color: colors.white  }}
             onClick={handleSubmit}
             disabled={loading}
             className={`w-full h-10 rounded-3xl font-semibold transition

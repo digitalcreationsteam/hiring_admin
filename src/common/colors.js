@@ -45,11 +45,13 @@
 // First, let's update the colors file with additional utility colors
 // common/colors.ts
 export const colors = {
-  primary: "#FFD85F",
+  primary: "#1A2C42",
   lightprimary: "#ebdcaf",
-  secondary: "#D9D9D9",
+  secondary: "#2E4056",
   accent: "#060606",
   background: "#F8F8F8",
+  white: "#FFFFFF",
+
   
   // Derived colors for consistent design
   surface: "#FFFFFF",

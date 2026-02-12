@@ -7,6 +7,7 @@ import { IconWithBackground } from "../ui/components/IconWithBackground";
 import { FeatherClock, FeatherMailCheck } from "@subframe/core";
 
 import API, { URL_PATH } from "../common/API";
+import { colors } from "common/colors";
 
 function EmailVerification() {
   const navigate = useNavigate();
@@ -131,7 +132,7 @@ useEffect(() => {
       <div className="w-full max-w-md flex flex-col items-center gap-4 rounded-3xl border border-neutral-border bg-white px-7 py-12 shadow-[0_6px_20px_rgba(15,15,15,0.05)]">
         <IconWithBackground
           size="large"
-          icon={<FeatherMailCheck className="w-4 h-4 text-violet-800" />}
+          icon={<FeatherMailCheck style={{color:colors.primary}} className="w-4 h-4" />}
           className="!rounded-full !p-2 !bg-violet-100"
         />
 
@@ -154,12 +155,13 @@ useEffect(() => {
           </span>
 
           <Button
+            style={{backgroundColor:colors.primary}}
             className={`h-10 w-full rounded-2xl transition-all duration-150
               ${canResend
-                ? "bg-violet-100 text-violet-700 shadow-sm"
-                : "bg-violet-50 text-violet-600/70"}
+                ? `bg-violet-100 text-violet-700 shadow-sm`
+                : `bg-violet-50 text-violet-600/70`}
             `}
-            variant="brand-secondary"
+            variant="brand-primary"
             size="small"
             onClick={handleResend}
             disabled={!canResend || isSending}

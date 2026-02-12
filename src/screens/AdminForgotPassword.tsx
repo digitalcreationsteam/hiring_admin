@@ -4,6 +4,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import API, { URL_PATH } from "../common/API";
+import { colors } from "common/colors";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -62,6 +63,7 @@ export default function ForgotPassword() {
           />
 
           <button
+            style={{backgroundColor:colors.primary}}
             onClick={handleSubmit}
             disabled={loading}
             className={`w-full h-10 rounded-3xl ${
