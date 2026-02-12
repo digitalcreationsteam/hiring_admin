@@ -1,7 +1,7 @@
-// AdminPageLayout.tsx - Updated with your color palette
+// AdminPageLayout.tsx - Updated with Location Filter
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   FeatherHome,
@@ -17,8 +17,12 @@ import {
   FeatherSettings,
   FeatherMenu,
   FeatherX,
+  FeatherMapPin,
+  FeatherLoader,
 } from "@subframe/core";
 import { colors } from "../../common/colors";
+import API from "../../common/API";
+import { URL_PATH } from "../../common/API";
 
 const base =
   "flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all";
@@ -46,7 +50,7 @@ function Item({ to, icon, label, collapsed, badge }: any) {
         )}
       </span>
       {!collapsed && (
-        <div className="flex-1 flex items-center justify-between">
+        <div className="flex-1 text-white flex items-center justify-between">
           <span>{label}</span>
           {badge && (
             <span
@@ -68,6 +72,20 @@ export default function AdminPageLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
+
+  // ===============================
+  // LOCATION FILTER STATE
+  // ===============================
+  const [countries, setCountries] = useState<string[]>([]);
+  const [states, setStates] = useState<string[]>([]);
+  const [selectedCountry, setSelectedCountry] = useState<string>("");
+  const [selectedState, setSelectedState] = useState<string>("");
+  const [locationStats, setLocationStats] = useState<any>(null);
+
+  const [loadingCountries, setLoadingCountries] = useState(true);
+  const [loadingStates, setLoadingStates] = useState(false);
+  const [loadingLocationStats, setLoadingLocationStats] = useState(false);
+  const [showLocationFilter, setShowLocationFilter] = useState(false);
 
   const isDocumentsRoute = useMemo(
     () => location.pathname.startsWith("/admin/documents"),
@@ -96,6 +114,87 @@ export default function AdminPageLayout() {
     { id: 3, text: "System backup completed", time: "Yesterday" },
   ];
 
+  // ===============================
+  // FETCH COUNTRIES
+  // ===============================
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoadingCountries(true);
+        const res = await API("GET", URL_PATH.getAllCountries);
+        
+        if (res?.success && Array.isArray(res?.data)) {
+          setCountries(res.data);
+          if (res.data.length > 0) {
+            setSelectedCountry(res.data[0]);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch countries:", err);
+        setCountries([]);
+      } finally {
+        setLoadingCountries(false);
+      }
+    })();
+  }, []);
+
+  // ===============================
+  // FETCH STATES WHEN COUNTRY CHANGES
+  // ===============================
+  useEffect(() => {
+    if (!selectedCountry) return;
+
+    (async () => {
+      try {
+        setLoadingStates(true);
+        setSelectedState("");
+        
+        const res = await API("GET", URL_PATH.getStatesByCountry, { 
+          country: selectedCountry 
+        });
+        
+        if (res?.success && Array.isArray(res?.data)) {
+          setStates(res.data);
+          if (res.data.length > 0) {
+            setSelectedState(res.data[0]);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch states:", err);
+        setStates([]);
+      } finally {
+        setLoadingStates(false);
+      }
+    })();
+  }, [selectedCountry]);
+
+  // ===============================
+  // FETCH USER COUNT BY LOCATION
+  // ===============================
+  useEffect(() => {
+    if (!selectedCountry || !selectedState) return;
+
+    (async () => {
+      try {
+        setLoadingLocationStats(true);
+        
+        const res = await API("GET", URL_PATH.getUsersByLocation, { 
+          country: selectedCountry,
+          state: selectedState
+        });
+        
+        if (res?.success && res?.data) {
+          setLocationStats(res.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch location stats:", err);
+        setLocationStats(null);
+      } finally {
+        setLoadingLocationStats(false);
+      }
+    })();
+  }, [selectedCountry, selectedState]);
+
   return (
     <div
       className="flex h-screen w-full overflow-hidden"
@@ -117,28 +216,23 @@ export default function AdminPageLayout() {
           ${collapsed ? "-translate-x-full lg:translate-x-0 w-20" : "w-64"}
         `}
         style={{
-          background: colors.surface,
+          background: colors.primary,
           borderRight: `1px solid ${colors.border}`,
         }}
       >
         {/* Brand */}
-<div
-  className="h-16 px-4 border-b flex items-center"
-  style={{ borderColor: colors.border }}
->
+        <div
+          className="h-16 px-4 border-b flex items-center"
+          style={{ borderColor: colors.border }}
+        >
           <div className="flex items-center gap-3">
-            {/* <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: colors.primary }}>
-              <span className="text-white font-bold text-lg">U</span>
-            </div> */}
             {!collapsed && (
               <div className="flex-1">
                 <img
-                  className="h-auto"
-                  src="/UniTalent.png"
+                  className="h-auto w-32 object-contain"
+                  src="/WhiteLogo.png"
                   alt="Company logo"
                 />
-                {/* <div className="font-bold" style={{ color: colors.textPrimary }}>UniTalhfjhent</div>
-                <div className="text-xs" style={{ color: colors.textSecondary }}>Admin Panel</div> */}
               </div>
             )}
             <button
@@ -155,28 +249,28 @@ export default function AdminPageLayout() {
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           <Item
             to="/admin/dashboard"
-            icon={<FeatherHome style={{ color: colors.textSecondary }} />}
+            icon={<FeatherHome style={{ color: colors.white }} />}
             label="Dashboard"
             collapsed={collapsed}
           />
 
           <Item
             to="/admin/users"
-            icon={<FeatherUsers style={{ color: colors.textSecondary }} />}
+            icon={<FeatherUsers style={{ color: colors.white }} />}
             label="Students"
             collapsed={collapsed}
           />
 
           <Item
             to="/admin/analytics"
-            icon={<FeatherPieChart style={{ color: colors.textSecondary }} />}
+            icon={<FeatherPieChart style={{ color: colors.white }} />}
             label="Analytics"
             collapsed={collapsed}
           />
 
           <Item
             to="/admin/recruiters"
-            icon={<FeatherBriefcase style={{ color: colors.textSecondary }} />}
+            icon={<FeatherBriefcase style={{ color: colors.white }} />}
             label="Recruiters"
             collapsed={collapsed}
           />
@@ -189,21 +283,9 @@ export default function AdminPageLayout() {
                 isDocumentsRoute ? active : inactive
               } ${collapsed ? "justify-center px-3" : ""}`}
             >
-              {/* <FeatherFile style={{ color: colors.textSecondary }} /> */}
               {!collapsed && (
                 <>
-                  {/* <span className="flex-1 text-left">Documents</span>
-                  {documentsOpen ? (
-                    <FeatherChevronDown
-                      className="w-4 h-4"
-                      style={{ color: colors.textSecondary }}
-                    />
-                  ) : (
-                    <FeatherChevronRight
-                      className="w-4 h-4"
-                      style={{ color: colors.textSecondary }}
-                    />
-                  )} */}
+                  {/* Empty section for documents */}
                 </>
               )}
             </button>
@@ -434,7 +516,6 @@ export default function AdminPageLayout() {
               </button>
 
               {/* Divider */}
-              {/* Divider */}
               <div
                 className="h-6 w-px"
                 style={{ background: colors.border }}
@@ -483,7 +564,20 @@ export default function AdminPageLayout() {
 
         {/* Page Content */}
         <div className="flex-1 overflow-y-auto p-6">
-          <Outlet />
+          <Outlet context={{ 
+            showLocationFilter, 
+            setShowLocationFilter,
+            countries,
+            states,
+            selectedCountry,
+            setSelectedCountry,
+            selectedState,
+            setSelectedState,
+            locationStats,
+            loadingCountries,
+            loadingStates,
+            loadingLocationStats,
+          }} />
         </div>
       </main>
     </div>

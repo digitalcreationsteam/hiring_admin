@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import API from "../common/API";
 import { URL_PATH } from "../common/URL_PATH";
 import { colors } from "../common/colors";
+import LocationFilter from "../ui/components/LocationFilter";
 import { 
   FeatherUsers, 
   FeatherUser, 
@@ -168,6 +169,20 @@ export default function AdminDashboardRight() {
         </div>
       </div>
 
+      
+      {/* =======================================
+          LOCATION FILTER SECTION - RESPONSIVE
+          ======================================= */}
+      <div className="mb-8">
+        <LocationFilter
+          onFilterChange={(data) => {
+            // Optional: Handle location filter changes
+            console.log("Location stats updated:", data);
+          }}
+          showResults={true}
+        />
+      </div>
+      
       {/* Activity & Stats Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activity */}
