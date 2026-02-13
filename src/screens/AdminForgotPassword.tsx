@@ -68,8 +68,8 @@ export default function ForgotPassword() {
             disabled={loading}
             className={`w-full h-10 rounded-3xl ${
               loading
-                ? "bg-violet-300 cursor-not-allowed"
-                : "bg-violet-600 text-white"
+                ? " text-white cursor-not-allowed"
+                : "text-white"
             }`}
           >
             {loading ? "Sending..." : "Reset Password"}

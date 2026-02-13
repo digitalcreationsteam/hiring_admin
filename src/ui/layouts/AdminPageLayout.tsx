@@ -321,7 +321,7 @@ export default function AdminPageLayout() {
           </div>
         </nav>
 
-        {/* User Profile & Logout */}
+        {/* User Profile & Logout 
         <div className="p-4 border-t" style={{ borderColor: colors.border }}>
           {!collapsed ? (
             <div className="space-y-3">
@@ -382,6 +382,8 @@ export default function AdminPageLayout() {
             </div>
           )}
         </div>
+        */}
+        
       </aside>
 
       {/* Main Content */}
@@ -531,23 +533,8 @@ export default function AdminPageLayout() {
               </button>
 
               {/* User Profile */}
-              {collapsed && (
+              
                 <div className="flex items-center gap-3">
-                  <div className="text-right">
-                    <div
-                      className="text-sm font-medium"
-                      style={{ color: colors.textPrimary }}
-                    >
-                      {adminName}
-                    </div>
-                    <div
-                      className="text-xs"
-                      style={{ color: colors.textSecondary }}
-                    >
-                      Admin
-                    </div>
-                  </div>
-
                   <div
                     className="w-9 h-9 rounded-full flex items-center justify-center"
                     style={{ background: colors.textPrimary }}
@@ -557,7 +544,7 @@ export default function AdminPageLayout() {
                     </span>
                   </div>
                 </div>
-              )}
+              
             </div>
           </div>
         </header>
