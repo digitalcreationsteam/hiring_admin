@@ -66,7 +66,13 @@ export const URL_PATH = {
   payingUser: "/admin/analytics/total-paying-users",
   dailyActiveUser: "/admin/analytics/daily-active-users",
   monthlyActiveUser: "/admin/analytics/monthly-active-users",
-  newUser: "/admin/analytics/new-users-today"
+  newUser: "/admin/analytics/new-users-today",
+
+  /* ---------- LOCATION FILTERS (NEW) ---------- */
+  getAllCountries: "/admin/analytics/countries",
+  getStatesByCountry: "/admin/analytics/states",
+  getUsersByLocation: "/admin/analytics/users-by-location",
+  
 }
 /* =========================================
    🚀 API WRAPPER FUNCTION
