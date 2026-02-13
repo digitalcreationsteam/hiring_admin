@@ -3,6 +3,7 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { User, Settings, LogOut } from 'lucide-react';
 import {
   FeatherHome,
   FeatherFile,
@@ -69,6 +70,7 @@ function Item({ to, icon, label, collapsed, badge }: any) {
 export default function AdminPageLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
@@ -225,7 +227,7 @@ export default function AdminPageLayout() {
           className="h-16 px-4 border-b flex items-center"
           style={{ borderColor: colors.border }}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-12">
             {!collapsed && (
               <div className="flex-1">
                 <img
@@ -237,10 +239,10 @@ export default function AdminPageLayout() {
             )}
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className="lg:hidden p-1.5 rounded-lg hover:bg-gray-100"
-              style={{ color: colors.textSecondary }}
+              className=" flex items-center justify-center lg:hidden w-5 h-5 p-1.5 rounded-md hover:bg-gray-100"
+              style={{ color: colors.primary, backgroundColor: colors.white }}
             >
-              <FeatherX className="w-5 h-5" />
+              <FeatherX className="w-3 h-3" />
             </button>
           </div>
         </div>
@@ -509,32 +511,34 @@ export default function AdminPageLayout() {
                 )}
               </div>
 
-              {/* Settings */}
+              {/* Settings 
               <button
                 className="p-2 rounded-lg hover:bg-gray-100"
                 style={{ color: colors.textSecondary }}
               >
                 <FeatherSettings className="w-5 h-5" />
-              </button>
+              </button>*/}
 
-              {/* Divider */}
+              {/* Divider 
               <div
                 className="h-6 w-px"
                 style={{ background: colors.border }}
-              ></div>
+              ></div>*/}
 
-              {/* Logout button */}
+              {/* Logout button 
               <button
                 onClick={logout}
                 className="px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-red-50"
                 style={{ color: colors.error }}
               >
                 Logout
-              </button>
+              </button>*/}
 
               {/* User Profile */}
               
-                <div className="flex items-center gap-3">
+                <div
+                 onClick={() => setOpen(!open)}
+                className="flex cursor-pointer items-center gap-3">
                   <div
                     className="w-9 h-9 rounded-full flex items-center justify-center"
                     style={{ background: colors.textPrimary }}
@@ -544,6 +548,64 @@ export default function AdminPageLayout() {
                     </span>
                   </div>
                 </div>
+
+                {open && (
+  <div className="absolute right-0 top-5  mt-10 w-1/3 bg-white border rounded-lg shadow-lg z-50 overflow-hidden">
+    
+    {/* Profile Header */}
+    <div className="px-4 py-4 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
+      <div className="flex items-center gap-3">
+        {/* Square Avatar */}
+        <div 
+        style={{backgroundColor:colors.primary}}
+        className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
+          <span className="text-white font-bold text-lg">
+            {/* Replace with user initials or image */}
+            {adminInitials}
+          </span>
+        </div>
+        
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-gray-900 text-sm truncate">
+            ADMIN
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {/* Menu Items */}
+    <div className="py-1">
+      <button
+        onClick={() => navigate("/my-profile")}
+        className="flex items-center gap-3 w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors text-sm text-gray-700 group"
+      >
+        <User className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+        <span>My Profile</span>
+      </button>
+
+      <button
+        onClick={() => navigate("/settings")}
+        className="flex items-center gap-3 w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors text-sm text-gray-700 group"
+      >
+        <Settings className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+        <span>Settings</span>
+      </button>
+    </div>
+
+    {/* Divider */}
+    <div className="border-t"></div>
+
+    {/* Logout Button */}
+    <button
+      onClick={logout}
+      className="flex items-center gap-3 w-full text-left px-4 py-3 hover:bg-red-50 transition-colors text-sm text-red-600 group"
+    >
+      <LogOut className="w-4 h-4 text-red-400 group-hover:text-red-600" />
+      <span>Logout</span>
+    </button>
+  </div>
+)}
+
               
             </div>
           </div>

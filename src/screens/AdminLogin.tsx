@@ -120,7 +120,7 @@ function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen w-full h-700 flex items-center justify-center bg-neutral-50 px-4 sm:px-6">
+    <div className="min-h-screen w-full h-700 flex items-center justify-center bg-[#EEF4FF] px-4 sm:px-6">
       <div 
       className="w-full max-w-[520px] border bg-white shadow-md rounded-xl overflow-hidden">
 <div className="flex justify-center w-full">

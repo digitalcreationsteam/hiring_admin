@@ -1057,7 +1057,7 @@ className={`absolute right-6 w-40 rounded-lg shadow-lg border z-10 ${
         className="px-3 py-1.5 text-sm rounded-lg"
         style={{
           background: page === num ? colors.primary : "transparent",
-          color: page === num ? colors.textPrimary : colors.textSecondary,
+          color: page === num ? colors.white : colors.textSecondary,
           border: `1px solid ${colors.border}`,
         }}
       >

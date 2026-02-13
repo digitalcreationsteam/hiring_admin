@@ -128,7 +128,7 @@ useEffect(() => {
 
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-neutral-50 py-12 px-4">
+    <div className="flex min-h-screen w-full items-center justify-center bg-[#EEF4FF] py-12 px-4">
       <div className="w-full max-w-md flex flex-col items-center gap-4 rounded-3xl border border-neutral-border bg-white px-7 py-12 shadow-[0_6px_20px_rgba(15,15,15,0.05)]">
         <IconWithBackground
           size="large"
