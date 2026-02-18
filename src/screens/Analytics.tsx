@@ -544,9 +544,9 @@ export default function Analytics() {
           />
           
           {/* Keep the other 3 steps as placeholders (not from API) */}
-          <FunnelStep label="Landing" users={10000} />
-          <FunnelStep label="Onboarding" users={4800} conversion="77%" />
-          <FunnelStep label="Dashboard" users={3200} conversion="82%" />
+          <FunnelStep label="Landing" users={0} />
+          <FunnelStep label="Onboarding" users={0} conversion="77%" />
+          <FunnelStep label="Dashboard" users={0} conversion="82%" />
         </div>
       </div>
 
