@@ -471,7 +471,7 @@ const totalPages = Math.ceil(filteredStudents.length / limit) || 1;
       }}
     >
       {/* Header */}
-      <div className="p-6 border-b" style={{ borderColor: colors.border }}>
+      <div className="p-3 border-b" style={{ borderColor: colors.border }}>
         <div className="mt-4 max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Total Students */}
           <div
@@ -631,8 +631,8 @@ const totalPages = Math.ceil(filteredStudents.length / limit) || 1;
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-between mt-6">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mt-6">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="relative">
               <FeatherSearch
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
@@ -652,7 +652,7 @@ const totalPages = Math.ceil(filteredStudents.length / limit) || 1;
               />
             </div>
 
-            <div className="relative">
+            {/* <div className="relative shrink-0">
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
@@ -671,7 +671,47 @@ const totalPages = Math.ceil(filteredStudents.length / limit) || 1;
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none"
                 style={{ color: colors.textTertiary }}
               />
-            </div>
+            </div> */}
+            <div className="relative shrink-0 w-auto">
+  <select
+    value={filter}
+    onChange={(e) => setFilter(e.target.value)}
+    className="
+      appearance-none
+      w-auto
+      min-w-[130px]
+      max-w-[180px]
+      pl-4 pr-10
+      py-2.5
+      text-sm sm:text-base
+      rounded-full
+      focus:outline-none
+      transition-all
+    "
+    style={{
+      border: `1px solid ${colors.border}`,
+      background: colors.background,
+      color: colors.textPrimary,
+    }}
+  >
+    <option value="all">All Status</option>
+    <option value="active">Active</option>
+    <option value="inactive">Inactive</option>
+  </select>
+
+  <FeatherChevronDown
+    className="
+      absolute
+      right-3
+      top-1/2
+      -translate-y-1/2
+      w-4 h-4 sm:w-5 sm:h-5
+      pointer-events-none
+    "
+    style={{ color: colors.textTertiary }}
+  />
+</div>
+
             <div className="relative">
               <select
                 value={countryFilter}

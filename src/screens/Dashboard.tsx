@@ -1,6 +1,7 @@
 
 
 // AdminDashboardRight.tsx - Updated with your color palette
+"use client";
 import React, { useEffect, useState } from "react";
 import API from "../common/API";
 import { URL_PATH } from "../common/URL_PATH";
@@ -31,35 +32,69 @@ export default function AdminDashboardRight() {
   const [loading, setLoading] = useState(true);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
+  // console.log("AdminDashboardRight Component Rendered");
+
+  // useEffect(() => {
+  //   (async () => {
+  //     try {
+  //       const statsRes = await API("GET", URL_PATH.adminStats);
+  //       console.log(statsRes);
+  //       if (statsRes?.success && statsRes?.data) {
+  //         setStats(statsRes.data);
+  //       } else if (statsRes?.success && Array.isArray(statsRes?.stats)) {
+  //         let students = 0;
+  //         let recruiters = 0;
+
+  //         statsRes.stats.forEach((x: any) => {
+  //           if (x._id === "student") students = x.count;
+  //           if (x._id === "recruiter") recruiters = x.count;
+  //         });
+
+  //         setStats({
+  //           totalUsers: students + recruiters,
+  //           totalStudents: students,
+  //           totalRecruiters: recruiters,
+  //         });
+  //       }
+  //     } catch (err) {
+  //       console.error("Dashboard fetch error:", err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   })();
+  // }, []);
+
   useEffect(() => {
-    (async () => {
-      try {
-        const statsRes = await API("GET", URL_PATH.adminStats);
+  (async () => {
+    try {
+      const statsRes = await API("GET", URL_PATH.adminStats);
+      console.log("Admin Stats Response:", statsRes);
 
-        if (statsRes?.success && statsRes?.data) {
-          setStats(statsRes.data);
-        } else if (statsRes?.success && Array.isArray(statsRes?.stats)) {
-          let students = 0;
-          let recruiters = 0;
+      if (statsRes?.success) {
+        let students = 0;
+        let recruiters = 0;
 
+        if (Array.isArray(statsRes?.stats)) {
           statsRes.stats.forEach((x: any) => {
             if (x._id === "student") students = x.count;
             if (x._id === "recruiter") recruiters = x.count;
           });
-
-          setStats({
-            totalUsers: students + recruiters,
-            totalStudents: students,
-            totalRecruiters: recruiters,
-          });
         }
-      } catch (err) {
-        console.error("Dashboard fetch error:", err);
-      } finally {
-        setLoading(false);
+
+        setStats({
+          totalUsers: statsRes.count || 0,   // 👈 using backend count
+          totalStudents: students,
+          totalRecruiters: recruiters,
+        });
       }
-    })();
-  }, []);
+    } catch (err) {
+      console.error("Dashboard fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  })();
+}, []);
+
 
   const StatCard = ({ 
     title, 
@@ -129,7 +164,7 @@ export default function AdminDashboardRight() {
   );
 
   return (
-    <div className="p-6 min-h-screen" style={{ background: colors.background }}>
+    <div className="px-0 py-0 md:px-0 min-h-screen" style={{ background: colors.background }}>
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between">

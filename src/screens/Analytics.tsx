@@ -479,7 +479,7 @@ export default function Analytics() {
         setEngagementData({
           totalUsers: totalUsersRes.count,
           payingUsers: payingUsersRes.totalPayingUsers,
-          dailyActiveUsers: dailyActiveRes.dailyActiveUser,
+          dailyActiveUsers: dailyActiveRes.dailyActiveUsers,
           monthlyActiveUsers: monthlyActiveRes.monthlyActiveUsers,
           newUsersToday: newUsersRes.newUsersToday,
         });
@@ -526,7 +526,7 @@ export default function Analytics() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Show only the 3 steps from API */}
           <FunnelStep 
             label="Signup" 
@@ -544,9 +544,9 @@ export default function Analytics() {
           />
           
           {/* Keep the other 3 steps as placeholders (not from API) */}
-          <FunnelStep label="Landing" users={0} />
+          {/* <FunnelStep label="Landing" users={0} />
           <FunnelStep label="Onboarding" users={0} conversion="77%" />
-          <FunnelStep label="Dashboard" users={0} conversion="82%" />
+          <FunnelStep label="Dashboard" users={0} conversion="82%" /> */}
         </div>
       </div>
 
