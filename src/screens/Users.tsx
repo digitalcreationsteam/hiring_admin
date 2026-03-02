@@ -16,6 +16,16 @@ import {
 } from "@subframe/core";
 import { colors } from "../common/colors";
 
+type Education = {
+  degree: string;
+  fieldOfStudy: string;
+  schoolName: string;
+  startYear: number;
+  endYear?: number;
+  currentlyStudying?: boolean;
+  gpa?: number | null;
+};
+
 type UserRow = {
   _id: string;
   firstname: string;
@@ -32,6 +42,7 @@ type UserRow = {
     city?: string;
     university?: string;
   };
+  education?: Education[]; 
 };
 
 type ScoreRow = {
@@ -282,21 +293,31 @@ useEffect(() => {
     );
   }, [users, countryFilter]);
 
+  // const universities = useMemo(() => {
+  //   return Array.from(
+  //     new Set(
+  //       users
+  //         .filter(
+  //           (u) =>
+  //             (countryFilter === "all" ||
+  //               u.location?.country === countryFilter) &&
+  //             (cityFilter === "all" || u.location?.city === cityFilter),
+  //         )
+  //         .map((u) => u.location?.university)
+  //         .filter(Boolean) as string[],
+  //     ),
+  //   );
+  // }, [users, countryFilter, cityFilter]);
+
   const universities = useMemo(() => {
-    return Array.from(
-      new Set(
-        users
-          .filter(
-            (u) =>
-              (countryFilter === "all" ||
-                u.location?.country === countryFilter) &&
-              (cityFilter === "all" || u.location?.city === cityFilter),
-          )
-          .map((u) => u.location?.university)
-          .filter(Boolean) as string[],
-      ),
-    );
-  }, [users, countryFilter, cityFilter]);
+  // Collect all universities from all users' education arrays
+  const allUniversities = users.flatMap((u) =>
+    u.education?.map((edu) => edu.schoolName) || []
+  );
+
+  // Remove duplicates
+  return Array.from(new Set(allUniversities));
+}, [users]);
 
   const dailyActiveUsers = useMemo(() => {
     const today = new Date().setHours(0, 0, 0, 0);
@@ -352,9 +373,13 @@ useEffect(() => {
       const matchesCity =
         cityFilter === "all" || student.location?.city === cityFilter;
 
+      // const matchesUniversity =
+      //   universityFilter === "all" ||
+      //   student.location?.university === universityFilter;
+
       const matchesUniversity =
-        universityFilter === "all" ||
-        student.location?.university === universityFilter;
+  universityFilter === "all" ||
+  student.education?.some((edu) => edu.schoolName === universityFilter);
 
       return (
         matchesSearch &&
